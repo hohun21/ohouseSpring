@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.shopping.category.CategoryMapper">
+	<resultMap type="com.ohouse.web.domain.shopping.category.CategoryDTO" id="categoryResultMap">
+		<result property="category_id" column="category_id"/>
+		<result property="category_name" column="category_name"/>
+		<result property="parentId" column="parent_id"/>
+		<result property="sortOrder" column="sort_order"/>
+	</resultMap>
+	
+	<select id="getAllcategories" resultMap="categoryResultMap">
+				SELECT category_id,
+	                   category_name,
+	                   parent_id,
+	                   sort_order
+	            FROM category
+	            ORDER BY parent_id NULLS FIRST, sort_order
+	</select>
+	
+	<select id="getRootCategories" resultMap="categoryResultMap">
+			SELECT category_id,
+		           category_name,
+		           parent_id,
+		           sort_order
+		    FROM category
+		    WHERE parent_id IS NULL
+		    ORDER BY sort_order
+	</select>
+	
+	<select id="getLeafCategories"  parameterType="int" resultMap="categoryResultMap">
+
+	    SELECT category_id,
+	           parent_id,
+	           category_name,
+	           sort_order
+	    FROM (
+	        SELECT c.*,
+	               CONNECT_BY_ISLEAF AS is_leaf
+	        FROM category c
+	        START WITH c.category_id = #{categoryId}
+	        CONNECT BY PRIOR c.category_id = c.parent_id
+	  		  )
+	    WHERE is_leaf = 1
+	    ORDER BY sort_order
+
+	</select>
+	
+	<select id="viewCategory" parameterType="long" resultMap="categoryResultMap">
+
+	    SELECT category_id,
+	           category_name,
+	           parent_id,
+	           sort_order
+	    FROM category
+	    START WITH category_id = (
+	        SELECT category_id
+	        FROM product
+	        WHERE product_id = #{productId}
+	    )
+	    CONNECT BY PRIOR parent_id = category_id
+	    ORDER BY sort_order
+
+	</select>
+	
+	<select id="getAllLeafCategories" resultMap="categoryResultMap">
+
+	    SELECT category_id,
+	           parent_id,
+	           category_name,
+	           sort_order
+	    FROM category
+	    WHERE CONNECT_BY_ISLEAF = 1
+	    START WITH parent_id IS NULL
+	    CONNECT BY PRIOR category_id = parent_id
+	    ORDER BY sort_order
+	
+	</select>
+	
+</mapper>
