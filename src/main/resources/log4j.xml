@@ -11,7 +11,7 @@
 	</appender>
 	
 	<!-- Application Loggers -->
-	<logger name="com.ohouse.web">
+	<logger name="org.doit.ik">
 		<level value="info" />
 	</logger>
 	
@@ -34,7 +34,8 @@
 
 	<!-- Root Logger -->
 	<root>
-		<priority value="warn" />
+<!--		<priority value="warn" />-->
+		<priority value="info"/>
 		<appender-ref ref="console" />
 	</root>
 	
