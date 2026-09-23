@@ -1,43 +1,36 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
+<div class="success-container">
+    <div class="success-icon">✓</div>
 
-<div class="payment-success">
-    <div class="success-container">
-        <div class="success-icon">✓</div>
+    <h1>결제가 완료되었습니다.</h1>
 
-        <h1>결제가 완료되었습니다.</h1>
+    <p>주문이 정상적으로 접수되었습니다.</p>
+    <p>이용해 주셔서 감사합니다.</p>
 
-        <p>주문이 정상적으로 접수되었습니다.</p>
-        <p>이용해 주셔서 감사합니다.</p>
-
-        <div class="success-actions">
-            <a href="${pageContext.request.contextPath}/main.htm" class="btn-home">
-                홈으로 가기
-            </a>
-            <a href="${pageContext.request.contextPath}/member/myShopping.htm" class="btn-order">
-                주문내역 확인
-            </a>
-        </div>
+    <div class="success-actions">
+        <a href="${pageContext.request.contextPath}/main.htm" class="btn-home">
+            홈으로 가기
+        </a>
+        <a href="${pageContext.request.contextPath}/order/order.htm" class="btn-order">
+            주문내역 확인
+        </a>
     </div>
 </div>
-
 </main>
 
 <style>
     .payment-success {
-        width: 100%;
-        min-height: 500px;
         display: flex;
         justify-content: center;
         align-items: center;
+        min-height: 500px;
         padding: 60px 20px;
-        box-sizing: border-box;
     }
 
     .success-container {
         width: 100%;
         max-width: 500px;
-        box-sizing: border-box;
         text-align: center;
         padding: 50px 30px;
         border: 1px solid #eee;
@@ -89,5 +82,4 @@
         color: white;
     }
 </style>
-
 <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
