@@ -41,7 +41,7 @@
 
     <!-- p95 -->
     <mybatis-spring:scan
-            base-package="org.doit.ik.mapper" />
+            base-package="com.ohouse.web.mapper" />
     <!-- p508 스프링 트랜잭션을 처리할 JDBC기반의 트랜잭션 관리자 등록 Spring JDBC 또는 mybatis DB처리 -->
     <bean id="transactionManager"
           class="org.springframework.jdbc.datasource.DataSourceTransactionManager">

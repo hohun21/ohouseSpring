@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.product.ReviewMapper">
+
+<!-- 리뷰 목록 조회 -->
+    <select id="selectReviewList" parameterType="com.ohouse.web.domain.product.review.ReviewPageDTO" resultType="com.ohouse.web.domain.product.review.ReviewDTO">
+        SELECT * FROM (
+            SELECT ROWNUM rnum, b.* FROM (
+                SELECT r.REVIEW_ID, r.PRODUCT_ID, r.MEMBER_ID, r.PRODUCT_OPTION_ID, r.IS_HIDE_IMAGE,
+                       CASE 
+                           WHEN m.MEMBER_ID IS NULL THEN '더미사용자' || r.REVIEW_ID
+                           WHEN m.STATUS = 0 THEN '탈퇴회원'
+                           ELSE m.NAME
+                       END AS WRITER_NAME,
+                       r.RATING, r.CONTENT,
+                       TO_CHAR(r.REG_DATE, 'YYYY-MM-DD') AS REG_DATE,
+                       TO_CHAR(r.EDIT_DATE, 'YYYY-MM-DD') AS EDIT_DATE,
+                       r.ADMIN_REPLY, r.IS_PURCHASED,
+                       img.IMG_ID, img.IMAGE_URL,
+                       opt.OPTION_NAME AS OPTION_NAME,
+                       (SELECT COUNT(*) FROM REVIEW_LIKE rl WHERE rl.REVIEW_ID = r.REVIEW_ID) AS HELP_COUNT,
+                       (SELECT COUNT(*) FROM REVIEW_LIKE rl WHERE rl.REVIEW_ID = r.REVIEW_ID AND rl.MEMBER_ID = #{member_id}) AS IS_LIKED
+                FROM REVIEW r
+                LEFT JOIN MEMBER m ON r.MEMBER_ID = m.MEMBER_ID
+                LEFT JOIN (
+                    SELECT REVIEW_ID, IMG_ID, IMAGE_URL
+                    FROM (
+                        SELECT REVIEW_ID, IMG_ID, IMAGE_URL,
+                               ROW_NUMBER() OVER (PARTITION BY REVIEW_ID ORDER BY IMG_ID ASC) as rn
+                        FROM REVIEW_IMAGE
+                    )
+                    WHERE rn = 1
+                ) img ON r.REVIEW_ID = img.REVIEW_ID
+                LEFT JOIN (
+                    SELECT po.PRODUCT_OPTION_ID,
+                           CASE 
+                               WHEN (SELECT COUNT(*) FROM OPTION_GROUP og WHERE og.PRODUCT_ID = po.PRODUCT_ID AND og.REQUIRED = 1) &lt;= 1 
+                               THEN MIN(ov.OPTION_NAME)
+                               ELSE LISTAGG(ov.OPTION_NAME, ' / ') WITHIN GROUP (ORDER BY og.SORT_ORDER, ov.OPTION_NAME)
+                           END AS OPTION_NAME
+                    FROM PRODUCT_OPTION po
+                    JOIN PRODUCT_OPTION_VALUE pov ON po.PRODUCT_OPTION_ID = pov.PRODUCT_OPTION_ID
+                    JOIN OPTION_VALUE ov ON pov.OPTION_VALUE_ID = ov.OPTION_VALUE_ID
+                    JOIN OPTION_GROUP og ON ov.OPTION_GROUP_ID = og.OPTION_GROUP_ID
+                    GROUP BY po.PRODUCT_OPTION_ID, po.PRODUCT_ID
+                ) opt ON r.PRODUCT_OPTION_ID = opt.PRODUCT_OPTION_ID
+                WHERE r.PRODUCT_ID = #{product_id}
+                  AND (m.STATUS IS NULL OR m.STATUS != -1)
+                  
+                  <!-- 1. 별점 동적 IN 절 -->
+                  <if test="ratings != null and ratings.size() > 0">
+                      AND r.RATING IN 
+                      <foreach item="rating" collection="ratings" open="(" separator="," close=")">
+                          #{rating}
+                      </foreach>
+                  </if>
+
+                  <!-- 2. 옵션 ID 동적 IN 절 -->
+                  <if test="options != null and options.size() > 0">
+                      AND r.PRODUCT_OPTION_ID IN 
+                      <foreach item="optionId" collection="options" open="(" separator="," close=")">
+                          #{optionId}
+                      </foreach>
+                  </if>
+
+                <!-- 3. 정렬 조건 동적 처리 -->
+                ORDER BY 
+                <choose>
+                    <when test="sort != null and sort == 'best'">
+                        HELP_COUNT DESC, r.RATING DESC, r.REG_DATE DESC
+                    </when>
+                    <otherwise>
+                        r.REG_DATE DESC, r.REVIEW_ID DESC
+                    </otherwise>
+                </choose>
+            ) b 
+            <!-- 페이징 endRow (currentPage * numberPerPage) -->
+            WHERE ROWNUM &lt;= (#{currentPage} * #{numberPerPage})
+        ) 
+        <!-- 페이징 startRow -->
+        WHERE rnum &gt;= ((#{currentPage} - 1) * #{numberPerPage} + 1)
+    </select>
+    
+<!-- 전체 리뷰 개수 조회 -->
+    <select id="getTotalRecords" parameterType="com.ohouse.web.domain.product.review.ReviewPageDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM REVIEW r
+        WHERE r.PRODUCT_ID = #{product_id}
+          
+          <!-- 별점 동적 IN 절 -->
+          <if test="ratings != null and ratings.size() > 0">
+              AND r.RATING IN 
+              <foreach item="rating" collection="ratings" open="(" separator="," close=")">
+                  #{rating}
+              </foreach>
+          </if>
+
+          <!-- 옵션 ID 동적 IN 절 -->
+          <if test="options != null and options.size() > 0">
+              AND r.PRODUCT_OPTION_ID IN 
+              <foreach item="optionId" collection="options" open="(" separator="," close=")">
+                  #{optionId}
+              </foreach>
+          </if>
+    </select>
+
+<!-- 특정 상품의 리뷰 통계 및 평점별 개수/비율 조회 -->
+    <select id="selectReviewSummary" parameterType="long" resultType="com.ohouse.web.domain.product.review.ReviewSummaryDTO">
+        SELECT 
+            TOTAL_COUNT AS totalCount,
+            ROUND(AVG_RATING, 1) AS avgRating,
+            COUNT5 AS count5,
+            COUNT4 AS count4,
+            COUNT3 AS count3,
+            COUNT2 AS count2,
+            COUNT1 AS count1,
+            DECODE(TOTAL_COUNT, 0, 0, ROUND((COUNT5 / TOTAL_COUNT) * 100)) AS rate5,
+            DECODE(TOTAL_COUNT, 0, 0, ROUND((COUNT4 / TOTAL_COUNT) * 100)) AS rate4,
+            DECODE(TOTAL_COUNT, 0, 0, ROUND((COUNT3 / TOTAL_COUNT) * 100)) AS rate3,
+            DECODE(TOTAL_COUNT, 0, 0, ROUND((COUNT2 / TOTAL_COUNT) * 100)) AS rate2,
+            DECODE(TOTAL_COUNT, 0, 0, ROUND((COUNT1 / TOTAL_COUNT) * 100)) AS rate1
+        FROM (
+            SELECT 
+                COUNT(*) as TOTAL_COUNT,
+                NVL(AVG(RATING), 0) as AVG_RATING,
+                COUNT(CASE WHEN RATING = 5 THEN 1 END) as COUNT5,
+                COUNT(CASE WHEN RATING = 4 THEN 1 END) as COUNT4,
+                COUNT(CASE WHEN RATING = 3 THEN 1 END) as COUNT3,
+                COUNT(CASE WHEN RATING = 2 THEN 1 END) as COUNT2,
+                COUNT(CASE WHEN RATING = 1 THEN 1 END) as COUNT1
+            FROM REVIEW 
+            WHERE PRODUCT_ID = #{productId}
+        )
+    </select>
+
+<!-- 2단 구조의 리뷰 옵션 필터 드롭다운용 목록 조회 -->
+	<select id="selectOptionFilterList" parameterType="long" resultMap="optionFilterResultMap">
+	    SELECT 
+	        <choose>
+	            <!-- 단일 옵션 상품일 때의 컬럼 구조 -->
+	            <when test="groupCount &lt;= 1">
+	                og.OPTION_GROUP_ID AS PARENT_VAL_ID,
+	                og.GROUP_NAME AS PARENT_VAL_NAME,
+	                po.PRODUCT_OPTION_ID,
+	                ov.OPTION_NAME AS SUB_OPTION_NAME
+	            </when>
+	            <!-- 복수 옵션 상품일 때의 컬럼 구조 -->
+	            <otherwise>
+	                ov1.OPTION_VALUE_ID AS PARENT_VAL_ID,
+	                ov1.OPTION_NAME AS PARENT_VAL_NAME,
+	                po.PRODUCT_OPTION_ID,
+	                ov2.OPTION_NAME AS SUB_OPTION_NAME
+	            </otherwise>
+	        </choose>
+	    FROM 
+	        <choose>
+	            <when test="groupCount &lt;= 1">
+	                OPTION_GROUP og
+	                JOIN OPTION_VALUE ov ON og.OPTION_GROUP_ID = ov.OPTION_GROUP_ID
+	                JOIN PRODUCT_OPTION_VALUE pov ON ov.OPTION_VALUE_ID = pov.OPTION_VALUE_ID
+	                JOIN PRODUCT_OPTION po ON pov.PRODUCT_OPTION_ID = po.PRODUCT_OPTION_ID
+	                WHERE og.PRODUCT_ID = #{productId}
+	                  AND po.STATUS = 'ACTIVE'
+	                ORDER BY ov.SORT_ORDER, po.PRODUCT_OPTION_ID
+	            </when>
+	            <otherwise>
+	                PRODUCT_OPTION po
+	                JOIN PRODUCT_OPTION_VALUE pov1 ON po.PRODUCT_OPTION_ID = pov1.PRODUCT_OPTION_ID
+	                JOIN OPTION_VALUE ov1 ON pov1.OPTION_VALUE_ID = ov1.OPTION_VALUE_ID
+	                JOIN OPTION_GROUP og1 ON ov1.OPTION_GROUP_ID = og1.OPTION_GROUP_ID AND og1.SORT_ORDER = 1
+	                JOIN PRODUCT_OPTION_VALUE pov2 ON po.PRODUCT_OPTION_ID = pov2.PRODUCT_OPTION_ID AND pov2.OPTION_VALUE_ID != ov1.OPTION_VALUE_ID
+	                JOIN OPTION_VALUE ov2 ON pov2.OPTION_VALUE_ID = ov2.OPTION_VALUE_ID
+	                JOIN OPTION_GROUP og2 ON ov2.OPTION_GROUP_ID = og2.OPTION_GROUP_ID AND og2.SORT_ORDER > 1
+	                WHERE po.PRODUCT_ID = #{productId}
+	                  AND po.STATUS = 'ACTIVE'
+	                ORDER BY og1.SORT_ORDER, og2.SORT_ORDER, po.PRODUCT_OPTION_ID
+	            </otherwise>
+	        </choose>
+	</select>
+
+<!-- 도움돼요 토글 1. 해당 유저가 해당 리뷰에 이미 좋아요를 눌렀는지 확인 -->
+	<select id="isReviewLiked" resultType="int" >
+		SELECT COUNT(*) FROM REVIEW_LIKE 
+		WHERE REVIEW_ID = #{reviewId}
+		AND MEMBER_ID = #{memberId}
+	</select>
+<!-- 2. 좋아요 추가 (INSERT)	 -->
+	<insert id="insertReviewLike">
+	INSERT INTO REVIEW_LIKE (ID, MEMBER_ID, REVIEW_ID) 
+	VALUES (SEQ_REVIEW_LIKE.NEXTVAL, #{memberId}, #{reviewId})
+	</insert>
+	
+<!-- 3. 좋아요 삭제 (DELETE) -->
+	<delete id="deleteReviewLike">
+		DELETE FROM REVIEW_LIKE 
+		WHERE REVIEW_ID = #{reviewId} 
+		AND MEMBER_ID = #{memberId}
+	</delete>
+	
+<!-- // 4. REVIEW_LIKE 테이블에서 직접 최신 좋아요 수 조회 (REVIEW 테이블의 HELP_COUNT 대체) -->	
+	<select id="getHelpCount" resultType="int">
+		SELECT COUNT(*) FROM REVIEW_LIKE 
+		WHERE REVIEW_ID = #{reviewId}
+	
+	</select>
+
+<!-- //리뷰 이미지 숨김/해제 상태 업데이트 (관리자용) -->
+	<update id="updateHideImage">
+		UPDATE REVIEW SET 
+		IS_HIDE_IMAGE = #{isHideImage} 
+		WHERE REVIEW_ID = #{reviewId}
+	</update>
+
+<!-- 관리자 답변 업데이트 -->
+	<update id="updateAdminReply">
+	    UPDATE REVIEW 
+	    SET ADMIN_REPLY = #{adminReply} 
+	    WHERE REVIEW_ID = #{reviewId}
+	</update>
+
+<!-- 1. 리뷰 등록 (주문 내역 자동 판정 및 PK 반환) -->
+    <insert id="insertReview" parameterType="com.ohouse.product.review.dto.ReviewDTO">
+        <selectKey keyProperty="reviewId" resultType="int" order="BEFORE">
+            SELECT SEQ_REVIEW.NEXTVAL FROM DUAL
+        </selectKey>
+
+        INSERT INTO REVIEW (
+            REVIEW_ID, 
+            PRODUCT_ID, 
+            MEMBER_ID, 
+            PRODUCT_OPTION_ID, 
+            RATING, 
+            CONTENT, 
+            REG_DATE, 
+            IS_PURCHASED, 
+            IS_HIDE_IMAGE
+        ) VALUES (
+            #{reviewId}, 
+            #{productId}, 
+            #{memberId}, 
+            <choose>
+                <when test="productOptionId != null and productOptionId > 0">
+                    #{productOptionId}
+                </when>
+                <otherwise>
+                    NULL
+                </otherwise>
+            </choose>,
+            #{rating}, 
+            #{content}, 
+            SYSDATE, 
+            #{isPurchased}, 
+            0
+        )
+    </insert>
+
+    <!-- 2. 리뷰 이미지 등록 (파라미터 명확화: @Param 대응) -->
+    <insert id="insertReviewImage">
+        INSERT INTO REVIEW_IMAGE (IMG_ID, REVIEW_ID, IMAGE_URL) 
+        VALUES (
+            SEQ_REVIEW_IMAGE.NEXTVAL, 
+            #{reviewId}, 
+            #{imageUrl}
+        )
+    </insert>
+
+    <!-- 3. 최신 주문 정보 조회 (옵션 ID 및 구매 여부 판정용) -->
+    <select id="findLatestOrderInfo" resultType="com.ohouse.product.review.dto.ReviewDTO">
+        SELECT productOptionId, orderDate, isPurchased
+        FROM (
+            SELECT od.PRODUCT_OPTION_ID AS productOptionId, 
+                   TO_CHAR(o.ORDER_DATE, 'YYYY-MM-DD') AS orderDate,
+                   1 AS isPurchased
+            FROM ORDERS o
+            JOIN ORDERS_DETAIL od ON o.ORDER_ID = od.ORDER_ID
+            JOIN PRODUCT_OPTION po ON od.PRODUCT_OPTION_ID = po.PRODUCT_OPTION_ID
+            WHERE o.MEMBER_ID = #{memberId} 
+              AND po.PRODUCT_ID = #{productId}
+            ORDER BY o.ORDER_DATE DESC
+        )
+        WHERE ROWNUM = 1
+    </select>
+    
+<!-- 1. 리뷰 수정 (별점, 내용, 수정일 변경) -->
+    <update id="updateReview" parameterType="com.ohouse.web.domain.product.review.ReviewDTO">
+        UPDATE REVIEW 
+        SET RATING = #{rating}, 
+            CONTENT = #{content}, 
+            EDIT_DATE = SYSDATE 
+        WHERE REVIEW_ID = #{reviewId} 
+          AND MEMBER_ID = #{memberId}
+    </update>
+
+    <!-- 2. 리뷰 이미지 수정 또는 등록 (MERGE INTO 활용) -->
+    <update id="updateReviewImage">
+        MERGE INTO REVIEW_IMAGE ri
+        USING (SELECT #{reviewId} AS REVIEW_ID, #{imageUrl} AS IMAGE_URL FROM DUAL) src
+        ON (ri.REVIEW_ID = src.REVIEW_ID)
+        WHEN MATCHED THEN
+            UPDATE SET ri.IMAGE_URL = src.IMAGE_URL
+        WHEN NOT MATCHED THEN
+            INSERT (IMG_ID, REVIEW_ID, IMAGE_URL) 
+            VALUES (SEQ_REVIEW_IMAGE.NEXTVAL, src.REVIEW_ID, src.IMAGE_URL)
+    </update>
+
+    <!-- 3. 리뷰 좋아요 내역 전체 삭제 (리뷰 삭제 시 연계) -->
+    <delete id="deleteReviewLikes">
+        DELETE FROM REVIEW_LIKE 
+        WHERE REVIEW_ID = #{reviewId}
+    </delete>
+
+    <!-- 4. 리뷰 이미지 전체 삭제 (리뷰 삭제 시 연계) -->
+    <delete id="deleteReviewImages">
+        DELETE FROM REVIEW_IMAGE 
+        WHERE REVIEW_ID = #{reviewId}
+    </delete>
+
+    <!-- 5. 리뷰 본문 삭제 -->
+    <delete id="deleteReview">
+        DELETE FROM REVIEW 
+        WHERE REVIEW_ID = #{reviewId}
+    </delete>
+    
+<!-- 1. 내가 작성한 리뷰 총 개수 조회 -->
+    <select id="selectMyReviewTotalCount" resultType="int">
+        SELECT COUNT(*) 
+        FROM REVIEW 
+        WHERE MEMBER_ID = #{memberId}
+    </select>    
+    
+<!-- 2. 내가 작성한 리뷰 목록 페이징 및 정렬 조회 -->
+    <select id="selectMyReviewList" resultType="com.ohouse.product.review.dto.ReviewDTO">
+        SELECT * FROM (
+            SELECT ROWNUM rnum, b.* FROM (
+                SELECT r.REVIEW_ID AS reviewId, 
+                       r.PRODUCT_ID AS productId, 
+                       r.MEMBER_ID AS memberId, 
+                       r.PRODUCT_OPTION_ID AS productOptionId, 
+                       r.IS_HIDE_IMAGE AS isHideImage,
+                       p.PRODUCT_NAME AS productName,
+                       NVL(m.NAME, '탈퇴한 사용자') AS writerName,
+                       r.RATING AS rating, 
+                       r.CONTENT AS content,
+                       TO_CHAR(r.REG_DATE, 'YYYY-MM-DD') AS regDate,
+                       TO_CHAR(r.EDIT_DATE, 'YYYY-MM-DD') AS editDate,
+                       r.ADMIN_REPLY AS adminReply, 
+                       r.IS_PURCHASED AS isPurchased,
+                       img.IMG_ID AS "reviewImage.imgId", 
+                       img.REVIEW_ID AS "reviewImage.reviewId", 
+                       img.IMAGE_URL AS "reviewImage.imageUrl",
+                       opt.OPTION_NAME AS optionName,
+                       (SELECT COUNT(*) FROM REVIEW_LIKE rl WHERE rl.REVIEW_ID = r.REVIEW_ID) AS helpCount
+                FROM REVIEW r
+                JOIN PRODUCT p ON r.PRODUCT_ID = p.PRODUCT_ID
+                LEFT JOIN MEMBER m ON r.MEMBER_ID = m.MEMBER_ID
+                LEFT JOIN (
+                    SELECT REVIEW_ID, IMG_ID, IMAGE_URL
+                    FROM (
+                        SELECT REVIEW_ID, IMG_ID, IMAGE_URL,
+                               ROW_NUMBER() OVER (PARTITION BY REVIEW_ID ORDER BY IMG_ID ASC) as rn
+                        FROM REVIEW_IMAGE
+                    )
+                    WHERE rn = 1
+                ) img ON r.REVIEW_ID = img.REVIEW_ID
+                LEFT JOIN (
+                    SELECT PRODUCT_OPTION_ID,
+                           LISTAGG(OPTION_NAME, ' / ') WITHIN GROUP (ORDER BY OPTION_NAME) AS OPTION_NAME
+                    FROM (
+                        SELECT DISTINCT pov.PRODUCT_OPTION_ID, ov.OPTION_NAME
+                        FROM PRODUCT_OPTION_VALUE pov
+                        JOIN OPTION_VALUE ov ON pov.OPTION_VALUE_ID = ov.OPTION_VALUE_ID
+                    )
+                    GROUP BY PRODUCT_OPTION_ID
+                ) opt ON r.PRODUCT_OPTION_ID = opt.PRODUCT_OPTION_ID
+                WHERE r.MEMBER_ID = #{member_id}
+                ORDER BY 
+                    <choose>
+                        <when test="sort != null and sort == 'best'">
+                            HELP_COUNT DESC, r.RATING DESC, r.REG_DATE DESC
+                        </when>
+                        <otherwise>
+                            r.REG_DATE DESC, r.REVIEW_ID DESC
+                        </otherwise>
+                    </choose>
+            ) b WHERE ROWNUM &lt;= #{endRow}
+        ) WHERE rnum &gt;= #{startRow}
+    </select>
+
+    <!-- 3. 사용자의 상품 구매 여부 확인 -->
+    <select id="hasUserPurchased" resultType="int">
+        SELECT COUNT(*) 
+        FROM ORDERS o
+        JOIN ORDERS_DETAIL od ON o.ORDER_ID = od.ORDER_ID
+        JOIN PRODUCT_OPTION po ON od.PRODUCT_OPTION_ID = po.PRODUCT_OPTION_ID
+        WHERE o.MEMBER_ID = #{memberId} 
+          AND po.PRODUCT_ID = #{productId}
+    </select>
+
+    <!-- 4. 최신 주문 정보 조회 (옵션 ID 및 구매 여부 판정용) -->
+    <select id="findLatestOrderInfo" resultType="com.ohouse.product.review.dto.ReviewDTO">
+        SELECT productOptionId, orderDate, isPurchased, memberId, productId
+        FROM (
+            SELECT od.PRODUCT_OPTION_ID AS productOptionId, 
+                   TO_CHAR(o.ORDER_DATE, 'YYYY-MM-DD') AS orderDate,
+                   1 AS isPurchased,
+                   #{memberId} AS memberId,
+                   #{productId} AS productId
+            FROM ORDERS o
+            JOIN ORDERS_DETAIL od ON o.ORDER_ID = od.ORDER_ID
+            JOIN PRODUCT_OPTION po ON od.PRODUCT_OPTION_ID = po.PRODUCT_OPTION_ID
+            WHERE o.MEMBER_ID = #{memberId} 
+              AND po.PRODUCT_ID = #{productId}
+            ORDER BY o.ORDER_DATE DESC
+        )
+        WHERE ROWNUM = 1
+    </select>
+
+    <!-- 5. 사용자가 해당 상품에 리뷰를 남긴 적이 있는지 확인 -->
+    <select id="hasUserReviewedProduct" resultType="int">
+        SELECT CASE 
+                    WHEN EXISTS (
+                        SELECT 1 
+                        FROM REVIEW 
+                        WHERE MEMBER_ID = #{memberId} AND PRODUCT_ID = #{productId}
+                    ) THEN 1 
+                    ELSE 0 
+                END AS HAS_REVIEWED
+        FROM DUAL
+    </select>       
+   
+</mapper>  
+ 

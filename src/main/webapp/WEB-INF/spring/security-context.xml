@@ -7,6 +7,9 @@
 
     <security:http pattern="/static/**" security="none"></security:http>
     <security:http pattern="/design/**" security="none"></security:http>
+    <security:http pattern="/css/**" security="none"></security:http>
+   	<security:http pattern="/js/**" security="none"></security:http> 
+    
 
     <security:http>
         <security:form-login/>
