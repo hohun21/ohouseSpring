@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.seller.SellerMapper">
+
+    <select id="getPendingSellers" resultType="com.ohouse.web.domain.seller.SellerDTO">
+        SELECT seller_id AS sellerId, email, password, representative_name AS representativeName, status, reg_date AS regDate 
+        FROM seller 
+        WHERE status = 'PENDING' 
+        ORDER BY seller_id DESC
+    </select>
+
+    <update id="updateSellerStatus">
+        UPDATE seller SET status = #{status} WHERE seller_id = #{sellerId}
+    </update>
+
+    <select id="getPendingSellerCount" resultType="int">
+        SELECT COUNT(*) FROM seller WHERE status = 'PENDING'
+    </select>
+
+    <select id="getPendingSellersWithPaging" resultType="com.ohouse.web.domain.seller.SellerDTO">
+        SELECT * FROM (
+            SELECT a.*, ROWNUM rnum FROM (
+                SELECT seller_id AS sellerId, email, representative_name AS representativeName, status, reg_date AS regDate 
+                FROM seller 
+                WHERE status = 'PENDING' 
+                ORDER BY seller_id DESC
+            ) a WHERE ROWNUM &lt;= #{endRow}
+        ) WHERE rnum &gt;= #{startRow}
+    </select>
+
+    <select id="getTotalSellerCount" resultType="int">
+        SELECT COUNT(*) FROM seller
+    </select>
+
+    <select id="getSellerListWithPaging" resultType="com.ohouse.web.domain.seller.SellerDTO">
+        SELECT * FROM (
+            SELECT a.*, ROWNUM rnum FROM (
+                SELECT seller_id AS sellerId, email, representative_name AS representativeName, status, reg_date AS regDate 
+                FROM seller 
+                ORDER BY seller_id DESC
+            ) a WHERE ROWNUM &lt;= #{endRow}
+        ) WHERE rnum &gt;= #{startRow}
+    </select>
+
+    <delete id="deleteSeller">
+        DELETE FROM seller WHERE seller_id = #{sellerId}
+    </delete>
+
+    <select id="getBrandId" resultType="int">
+        SELECT brand_id FROM brand WHERE brand_name = #{brandName}
+    </select>
+
+    <!-- 상품 등록 (useGeneratedKeys로 PK인 productId 자동 주입) -->
+    <insert id="insertProduct" parameterType="com.ohouse.web.domain.seller.ProductDTO" useGeneratedKeys="true" keyProperty="productId" keyColumn="product_id">
+        INSERT INTO product (product_id, category_id, brand_id, product_name, price, description, original_price, discount_rate, created, updated, status) 
+        VALUES (product_seq.NEXTVAL, #{categoryId}, #{brandId}, #{productName}, #{price}, #{description}, #{originalPrice}, #{discountRate}, SYSDATE, SYSDATE, 'ACTIVE')
+    </insert>
+
+    <select id="getProductById" resultType="com.ohouse.web.domain.seller.ProductDTO">
+        SELECT p.product_id AS productId, p.category_id AS categoryId, p.brand_id AS brandId, 
+               p.product_name AS productName, p.price, p.description, 
+               p.original_price AS originalPrice, p.discount_rate AS discountRate, b.brand_name AS brandName 
+        FROM product p 
+        JOIN brand b ON p.brand_id = b.brand_id 
+        WHERE p.product_id = #{productId}
+    </select>
+
+    <update id="updateProduct" parameterType="com.ohouse.web.domain.seller.ProductDTO">
+        UPDATE product 
+        SET category_id = #{categoryId}, brand_id = #{brandId}, product_name = #{productName}, 
+            price = #{price}, description = #{description}, original_price = #{originalPrice}, 
+            discount_rate = #{discountRate}, updated = SYSDATE 
+        WHERE product_id = #{productId}
+    </update>
+
+    <insert id="insertOptionGroup" parameterType="com.ohouse.web.domain.seller.OptionGroupDTO" useGeneratedKeys="true" keyProperty="optionGroupId" keyColumn="option_group_id">
+        INSERT INTO option_group (option_group_id, product_id, group_name, sort_order, required) 
+        VALUES (option_group_seq.NEXTVAL, #{productId}, #{groupName}, #{sortOrder}, #{required})
+    </insert>
+
+    <insert id="insertOptionValue" parameterType="com.ohouse.web.domain.seller.OptionValueDTO" useGeneratedKeys="true" keyProperty="optionValueId" keyColumn="option_value_id">
+        INSERT INTO option_value (option_value_id, option_group_id, option_name, sort_order) 
+        VALUES (option_value_seq.NEXTVAL, #{optionGroupId}, #{optionName}, #{sortOrder})
+    </insert>
+
+    <select id="getOptionGroups" resultType="com.ohouse.web.domain.seller.OptionGroupDTO">
+        SELECT option_group_id AS optionGroupId, product_id AS productId, group_name AS groupName, sort_order AS sortOrder, required 
+        FROM option_group 
+        WHERE product_id = #{productId} 
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="getOptionValues" resultType="com.ohouse.web.domain.seller.OptionValueDTO">
+        SELECT option_value_id AS optionValueId, option_group_id AS optionGroupId, option_name AS optionName, sort_order AS sortOrder 
+        FROM option_value 
+        WHERE option_group_id = #{optionGroupId} 
+        ORDER BY sort_order ASC
+    </select>
+
+    <delete id="deleteOptionGroupsByProductId">
+        DELETE FROM option_group WHERE product_id = #{productId}
+    </delete>
+
+    <insert id="insertProductOption" parameterType="com.ohouse.web.domain.seller.ProductOptionDTO" useGeneratedKeys="true" keyProperty="productOptionId" keyColumn="product_option_id">
+        INSERT INTO product_option (product_option_id, product_id, sku, price, stock, status) 
+        VALUES (product_option_seq.NEXTVAL, #{productId}, #{sku}, #{price}, #{stock}, #{status})
+    </insert>
+
+    <update id="updateProductOption" parameterType="com.ohouse.web.domain.seller.ProductOptionDTO">
+        UPDATE product_option 
+        SET price = #{price}, stock = #{stock}, status = #{status} 
+        WHERE product_option_id = #{productOptionId}
+    </update>
+
+    <delete id="deleteProductOption">
+        DELETE FROM product_option WHERE product_option_id = #{productOptionId}
+    </delete>
+
+    <delete id="deleteProductOptionsByProductId">
+        DELETE FROM product_option WHERE product_id = #{productId}
+    </delete>
+
+    <insert id="insertProductOptionValue">
+        INSERT INTO product_option_value (product_option_value_id, product_option_id, option_value_id) 
+        VALUES (product_option_value_seq.NEXTVAL, #{productOptionId}, #{optionValueId})
+    </insert>
+
+    <select id="getProductOptions" resultType="com.ohouse.web.domain.seller.ProductOptionDTO">
+        SELECT product_option_id AS productOptionId, product_id AS productId, sku, price, stock, status 
+        FROM product_option 
+        WHERE product_id = #{productId} 
+        ORDER BY product_option_id ASC
+    </select>
+
+    <insert id="insertProductImage">
+        INSERT INTO product_image (image_id, product_id, image_url, image_type, sort_order) 
+        VALUES (seq_product_image.NEXTVAL, #{productId}, #{imageUrl}, #{imageType}, #{sortOrder})
+    </insert>
+
+    <delete id="deleteProductImages">
+        DELETE FROM product_image WHERE product_id = #{productId}
+    </delete>
+
+    <select id="getTotalProductCount" resultType="int">
+        SELECT COUNT(*) FROM product WHERE brand_id = #{brandId}
+    </select>
+
+    <select id="getSoldOutProductCount" resultType="int">
+        SELECT COUNT(*) FROM (
+            SELECT p.product_id FROM product p 
+            JOIN product_option po ON p.product_id = po.product_id 
+            WHERE p.brand_id = #{brandId} 
+            GROUP BY p.product_id 
+            HAVING SUM(po.stock) = 0
+        )
+    </select>
+
+    <select id="getProductListByBrandId" resultType="com.ohouse.web.domain.seller.ProductDTO">
+        SELECT p.product_id AS productId, p.category_id AS categoryId, p.brand_id AS brandId, 
+               p.product_name AS productName, p.price, p.description, 
+               p.original_price AS originalPrice, p.discount_rate AS discountRate, 
+               p.status, p.created, p.updated, 
+               NVL(SUM(po.stock), 0) AS totalStock 
+        FROM product p 
+        LEFT JOIN product_option po ON p.product_id = po.product_id 
+        WHERE p.brand_id = #{brandId} 
+        GROUP BY p.product_id, p.category_id, p.brand_id, p.product_name, p.price, 
+                 p.description, p.original_price, p.discount_rate, p.status, p.created, p.updated 
+        ORDER BY p.product_id DESC
+    </select>
+
+    <select id="getAllProductsForAdmin" resultType="com.ohouse.web.domain.seller.ProductDTO">
+        SELECT p.product_id AS productId, p.category_id AS categoryId, p.brand_id AS brandId, 
+               b.brand_name AS brandName, p.product_name AS productName, p.price, p.status, p.created 
+        FROM product p 
+        JOIN brand b ON p.brand_id = b.brand_id 
+        ORDER BY p.product_id DESC
+    </select>
+
+    <delete id="deleteProduct">
+        DELETE FROM product WHERE product_id = #{productId}
+    </delete>
+
+    <update id="updateProductStatus">
+        UPDATE product SET status = #{status} WHERE product_id = #{productId}
+    </update>
+
+    <select id="getStopProductCount" resultType="int">
+        SELECT COUNT(*) FROM product WHERE brand_id = #{brandId} AND status = 'STOP'
+    </select>
+
+    <update id="resetAllOptionStocksToZero">
+        UPDATE product_option SET stock = 0, status = 'SOLD_OUT' WHERE product_id = #{productId}
+    </update>
+
+    <update id="updateOptionPriceAndStock">
+	    UPDATE product_option 
+	    SET price = #{price}, 
+	        stock = #{stock}, 
+	        status = CASE WHEN #{stock} = 0 THEN 'SOLD_OUT' ELSE 'ACTIVE' END 
+	    WHERE product_id = #{productId} AND sku = #{skuName}
+	</update>
+
+</mapper>

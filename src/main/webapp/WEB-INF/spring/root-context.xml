@@ -17,14 +17,14 @@
             <property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:XE"></property> -->
         <property name="driverClassName"
                   value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
-        <property name="jdbcUrl"
-                  value="jdbc:log4jdbc:oracle:thin:@localhost:1521/XEPDB1"></property>
+         <property name="jdbcUrl"
+                  value="jdbc:log4jdbc:oracle:thin:@zeroflav.iptime.org:1521/XEPDB1"></property>
        <!-- <property name="driverClassName"
                   value="oracle.jdbc.OracleDriver"></property>
         <property name="jdbcUrl"
                   value="jdbc:oracle:thin:@localhost:1521/XEPDB1"></property>-->
-        <property name="username" value="scott"></property>
-        <property name="password" value="tiger"></property>
+        <property name="username" value="ohouse"></property>
+        <property name="password" value="Oh1234"></property>
     </bean>
 
     <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
@@ -40,8 +40,7 @@
     </bean>
 
     <!-- p95 -->
-    <mybatis-spring:scan
-            base-package="org.doit.ik.mapper" />
+    <mybatis-spring:scan base-package="com.ohouse.web.mapper" />
     <!-- p508 스프링 트랜잭션을 처리할 JDBC기반의 트랜잭션 관리자 등록 Spring JDBC 또는 mybatis DB처리 -->
     <bean id="transactionManager"
           class="org.springframework.jdbc.datasource.DataSourceTransactionManager">

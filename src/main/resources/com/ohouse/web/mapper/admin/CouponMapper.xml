@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.admin.CouponMapper">
+
+    <select id="selectAllCoupons" resultType="com.ohouse.web.domain.admin.CouponDTO">
+        SELECT coupon_id AS couponId, 
+               coupon_name AS couponName, 
+               discount_type AS discountType, 
+               discount_value AS discountValue, 
+               min_order_price AS minOrderPrice, 
+               max_discount AS maxDiscount, 
+               start_date AS startDate, 
+               end_date AS endDate, 
+               status 
+        FROM coupon 
+        ORDER BY coupon_id DESC
+    </select>
+
+    <insert id="insertCoupon">
+        INSERT INTO coupon (
+            coupon_id, coupon_name, discount_type, discount_value, 
+            min_order_price, max_discount, start_date, end_date
+        ) VALUES (
+            coupon_seq.NEXTVAL, #{couponName}, #{discountType}, #{discountValue}, 
+            #{minOrderPrice}, #{maxDiscount}, SYSDATE, #{endDate}
+        )
+    </insert>
+
+    <update id="updateCouponStatus">
+        UPDATE coupon 
+        SET status = #{status} 
+        WHERE coupon_id = #{couponId}
+    </update>
+
+    <select id="selectAllActiveMemberIds" resultType="int">
+        SELECT member_id FROM member WHERE status = 1
+    </select>
+
+    <insert id="insertMemberCouponBatch">
+        INSERT INTO member_coupon (member_coupon_id, member_id, coupon_id, issued_date, status)
+        SELECT member_coupon_seq.NEXTVAL, A.* FROM (
+            <foreach collection="memberIds" item="memberId" separator=" UNION ALL ">
+                SELECT #{memberId} AS member_id, #{couponId} AS coupon_id, SYSDATE AS issued_date, 'AVAILABLE' AS status 
+                FROM DUAL
+            </foreach>
+        ) A
+    </insert>
+
+</mapper>

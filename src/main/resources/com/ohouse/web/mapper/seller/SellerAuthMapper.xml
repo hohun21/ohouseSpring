@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.seller.SellerAuthMapper">
+
+    <insert id="insert">
+        INSERT INTO seller (
+            seller_id, email, password, business_number, 
+            representative_name, mail_order_number, 
+            business_address, representative_contact, 
+            customer_service_phone, status
+        ) VALUES (
+            seq_seller.NEXTVAL, #{email}, #{password}, #{businessNumber}, 
+            #{representativeName}, #{mailOrderNumber}, 
+            #{businessAddress}, #{representativeContact}, 
+            #{customerServicePhone}, 'PENDING'
+        )
+    </insert>
+
+    <select id="selectByEmail" resultType="com.ohouse.web.domain.seller.SellerDTO">
+        SELECT seller_id AS sellerId, email, password, 
+               business_number AS businessNumber, 
+               representative_name AS representativeName, 
+               mail_order_number AS mailOrderNumber, 
+               business_address AS businessAddress, 
+               representative_contact AS representativeContact, 
+               customer_service_phone AS customerServicePhone, 
+               status, reg_date AS regDate 
+        FROM seller 
+        WHERE email = #{email}
+    </select>
+
+    <select id="emailCheck" resultType="string">
+        SELECT '{"count":' || COUNT(*) || '}' 
+        FROM seller 
+        WHERE LOWER(email) = LOWER(#{email})
+    </select>
+
+    <select id="businessNumberCheck" resultType="string">
+        SELECT '{ "count":' || COUNT(*) || ' }' 
+        FROM seller 
+        WHERE business_number = #{businessNumber}
+    </select>
+
+    <select id="mailOrderNumberCheck" resultType="string">
+        SELECT '{ "count":' || COUNT(*) || ' }' 
+        FROM seller 
+        WHERE mail_order_number = #{mailOrderNumber}
+    </select>
+
+    <select id="statusCheck" resultType="string">
+        SELECT status FROM seller WHERE email = #{email}
+    </select>
+
+    <update id="updatePassword">
+        UPDATE seller 
+        SET password = #{newPassword} 
+        WHERE seller_id = #{sellerId}
+    </update>
+
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.admin.AdminMapper">
+
+    <select id="getAllMembers" resultType="com.ohouse.web.domain.member.MemberDTO">
+        SELECT 
+            m.member_id AS memberId, 
+            m.id, 
+            m.name, 
+            ma.authority AS role, 
+            m.reg_date AS regDate, 
+            m.status 
+        FROM member m
+        LEFT JOIN member_authorities ma ON m.id = ma.username
+        ORDER BY m.member_id DESC
+    </select>
+
+    <select id="getTotalMemberCount" resultType="int">
+        SELECT COUNT(*) FROM member
+    </select>
+
+    <select id="getMemberListWithPaging" resultType="com.ohouse.web.domain.member.MemberDTO">
+        SELECT * FROM (
+            SELECT a.*, ROWNUM rnum FROM (
+                SELECT 
+                    m.member_id AS memberId, 
+                    m.id, 
+                    m.name, 
+                    ma.authority AS role, 
+                    m.reg_date AS regDate, 
+                    m.status 
+                FROM member m
+                LEFT JOIN member_authorities ma ON m.id = ma.username
+                ORDER BY m.member_id DESC
+            ) a WHERE ROWNUM &lt;= #{endRow}
+        ) WHERE rnum &gt;= #{startRow}
+    </select>
+
+    <update id="updateMemberStatus">
+        UPDATE member 
+        SET status = #{status} 
+        WHERE member_id = #{memberId}
+    </update>
+
+</mapper>

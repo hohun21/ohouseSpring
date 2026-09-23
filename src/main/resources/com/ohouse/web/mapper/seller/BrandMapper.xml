@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.seller.BrandMapper">
+
+    <insert id="insert">
+        INSERT INTO brand (brand_id, brand_name, seller_id) 
+        VALUES (seq_brand.NEXTVAL, #{brandName}, #{sellerId})
+    </insert>
+
+    <select id="selectByBrandName" resultType="com.ohouse.web.domain.seller.BrandDTO">
+        SELECT brand_id AS brandId, brand_name AS brandName, seller_id AS sellerId 
+        FROM brand 
+        WHERE brand_name = #{brandName}
+    </select>
+
+    <select id="selectBySellerId" resultType="com.ohouse.web.domain.seller.BrandDTO">
+        SELECT brand_id AS brandId, brand_name AS brandName, seller_id AS sellerId 
+        FROM brand 
+        WHERE seller_id = #{sellerId}
+    </select>
+
+    <select id="brandNameCheck" resultType="string">
+        SELECT '{ "count":' || COUNT(*) || ' }' AS jsonResult 
+        FROM brand 
+        WHERE brand_name = #{brandName}
+    </select>
+
+</mapper>
