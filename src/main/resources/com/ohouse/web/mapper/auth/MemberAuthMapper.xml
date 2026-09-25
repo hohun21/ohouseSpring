@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.auth.MemberAuthMapper">
+
+	<!-- public MemberVO getMember(@Param("id") String id) -->
+	<select id="getMember" resultType="com.ohouse.web.domain.member.MemberVO">
+		SELECT * FROM member WHERE id=#{id}
+	</select>
+
+	<!-- public int insert(MemberVO memberVO) -->
+	<insert id="insert">
+		INSERT INTO member( member_id, id, password, name, reg_date, rank, status )
+		VALUES( seq_member.NEXTVAL, #{id}, #{password}, #{name}, SYSDATE, 'NORMAL', '1' )
+	</insert>
+	
+	<!-- public int insertAuthority(@Param("id") String id) -->
+	<insert id="insertAuthority">
+    	INSERT INTO member_authorities (username, authority)
+    	VALUES ( #{id}, 'ROLE_USER' )
+	</insert>
+	
+	<!-- public MemberVO read(@Param("id") String id) -->
+	<resultMap id="memberMap" type="com.ohouse.web.domain.member.MemberVO">
+	    <id property="memberId" column="member_id"/>
+	    <result property="id" column="id"/>
+	    <result property="password" column="password"/>
+	    <result property="name" column="name"/>
+	    <result property="rank" column="rank"/>
+	    <result property="status" column="status"/>
+	    <result property="regDate" column="reg_date"/>
+	
+	    <collection property="authList"
+	                ofType="com.ohouse.web.domain.auth.AuthoritiesVO">
+	        <result property="username" column="username"/>
+	        <result property="authority" column="authority"/>
+	    </collection>
+	</resultMap>
+	
+	<select id="read" resultMap="memberMap">
+		SELECT m.member_id, m.id, m.password, m.name, m.rank, m.status, m.reg_date,
+				auth.username, auth.authority
+		FROM member m LEFT JOIN member_authorities auth ON m.id = auth.username
+		WHERE m.id = #{id}
+	</select>
+
+	<!-- public Integer statusCheck(@Param("id") String id)  -->
+	<select id="statusCheck" resultType="java.lang.Integer">
+		SELECT status FROM member WHERE id = #{id}
+	</select>
+
+</mapper>

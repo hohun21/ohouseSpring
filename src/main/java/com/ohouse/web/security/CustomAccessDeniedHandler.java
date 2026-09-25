@@ -25,7 +25,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 		// 	 :
 		//   :
 		
-		response.sendRedirect("/common/accessError.htm");
+		String redirectUrl = request.getContextPath() + "/common/accessError.htm";
+
+		response.sendRedirect(redirectUrl);
 	}
 
 }

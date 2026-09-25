@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -103,8 +104,7 @@ a { text-decoration: none; color: inherit; }
 
 		<div class="divider"></div>
 
-		<form action="signup.htm" method="post">
-
+		<form action="${pageContext.request.contextPath}/auth/signup.htm" method="post">
 			<!-- 아이디 -->
 			<div class="form-group">
 				<label class="label">아이디</label>
@@ -311,7 +311,6 @@ $(function () {
     }
 });
 </script>
-
 			<!-- 약관 동의 -->
 			<div class="form-group">
 				<label class="label">약관동의</label>
@@ -357,6 +356,7 @@ $(function () {
 			</div>
 
 			<button type="submit" class="btn-submit">회원가입하기</button>
+			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 		</form>
 
 		<div class="login-link">
