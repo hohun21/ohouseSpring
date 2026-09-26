@@ -1,0 +1,66 @@
+* { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
+body { background-color: #fff; color: #2F3438; display: flex; flex-direction: column; align-items: center; padding-bottom: 80px; }
+a { text-decoration: none; color: inherit; }
+
+/* 좌측 상단 로고 */
+.header-logo { width: 100%; padding: 40px 0 0 60px; }
+.logo-area { display: inline-flex; align-items: center; cursor: pointer; }
+.logo-area svg { height: 42px; width: auto; } 
+
+/* 메인 컨테이너 */
+.signup-container { width: 100%; max-width: 440px; margin-top: 20px; }
+.page-title { font-size: 24px; font-weight: 700; text-align: left; margin-bottom: 40px; }
+
+/* SNS 간편 회원가입 */
+.sns-area { text-align: center; margin-bottom: 35px; }
+.sns-title { font-size: 13px; color: #757575; margin-bottom: 18px; }
+.sns-buttons { display: flex; justify-content: center; gap: 20px; }
+.sns-btn { width: 54px; height: 54px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: opacity 0.2s; }
+.sns-btn:hover { opacity: 0.85; }
+.sns-btn.facebook { background-color: #3b5998; color: white; font-size: 30px; font-family: serif; font-style: italic; font-weight: bold; padding-top: 4px; padding-right: 2px; }
+.sns-btn.kakao { background-color: #FEE500; color: #381E1F; font-size: 15px; font-weight: 900; }
+.sns-btn.naver { background-color: #03C75A; color: white; font-size: 22px; font-weight: 900; }
+.divider { width: 100%; height: 1px; background-color: #EAEDEF; margin-bottom: 35px; }
+
+/* 폼 입력 영역 */
+.form-group { margin-bottom: 30px; }
+.label { display: block; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.sub-text { font-size: 13px; color: #757575; margin-bottom: 10px; display: block; }
+.input-box { width: 100%; border: 1px solid #DADCE0; border-radius: 4px; padding: 15px; font-size: 16px; outline: none; color: #2F3438; }
+.input-box:focus { border-color: #1496f4; }
+.input-box::placeholder { color: #BDBDBD; }
+
+/* 아이디 및 버튼 그룹 */
+.id-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.id-wrap input { flex: 1; padding: 15px; border: 1px solid #DADCE0; border-radius: 4px; font-size: 16px; outline: none; color: #2F3438; }
+.id-wrap input:focus { border-color: #1496f4; }
+.btn-verify { width: 100px; padding: 15px 0; background-color: #F7F9FA; color: #757575; border: 1px solid #EAEDEF; border-radius: 4px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background-color 0.2s; }
+.btn-verify:hover { background-color: #F0F2F4; color: #424242; }
+
+/* 약관 동의 박스 */
+.terms-box { border: 1px solid #DADCE0; border-radius: 4px; padding: 0 18px; background: #fff; margin-bottom: 25px; }
+.term-item { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid #EAEDEF; font-size: 15px; color: #2F3438; cursor: pointer; }
+.term-item:last-child { border-bottom: none; }
+.term-left { display: flex; align-items: center; gap: 12px; }
+.term-left input[type="checkbox"] { width: 20px; height: 20px; accent-color: #1496f4; cursor: pointer; }
+.term-item.bold .term-left span { font-weight: 700; }
+.term-sub { font-size: 13px; color: #9E9E9E; font-weight: 400; margin-left: 6px; }
+.term-arrow { color: #BDBDBD; font-weight: 700; font-size: 16px; }
+
+/* 리캡챠 가짜 UI */
+.recaptcha-box { border: 1px solid #DADCE0; border-radius: 4px; background: #FAFAFA; padding: 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
+.recaptcha-left { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; }
+.recaptcha-checkbox { width: 28px; height: 28px; border: 2px solid #C1C1C1; border-radius: 2px; background: #fff; }
+.recaptcha-right { text-align: center; font-size: 11px; color: #9E9E9E; }
+.recaptcha-icon { font-size: 24px; margin-bottom: 4px; }
+
+/* 제출 버튼 */
+.btn-submit { width: 100%; padding: 18px; background-color: #1496f4; color: white; border: none; border-radius: 4px; font-size: 18px; font-weight: 700; cursor: pointer; margin-bottom: 25px; transition: background-color 0.2s; }
+.btn-submit:hover { background-color: #0b80d6; }
+
+/* 하단 링크 */
+.login-link, .seller-signup-link { text-align: center; font-size: 15px; color: #424242; margin-bottom: 10px; }
+.login-link a, .seller-signup-link a { font-weight: 700; text-decoration: underline; margin-left: 6px; }
+
+.form-error { color: #e53935; }
+.term-required { color: #1496f4; }

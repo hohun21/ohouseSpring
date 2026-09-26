@@ -8,47 +8,10 @@
 <!-- 프리텐다드 폰트 적용 -->
 <link rel="stylesheet" as="style" crossorigin
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-<style>
-* { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
-body { background-color: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; position: relative; }
-a { text-decoration: none; color: inherit; }
-
-.login-container { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; padding-bottom: 40px; }
-.logo-area { display: flex; justify-content: center; margin-bottom: 40px; cursor: pointer; }
-.logo-area svg { height: 50px; width: auto; }
-form { width: 100%; }
-
-.input-group { width: 100%; border: 1px solid #dadce0; border-radius: 4px; overflow: hidden; background: #fff; margin-bottom: 20px; }
-.input-group input { width: 100%; border: none; padding: 16px 18px; font-size: 16px; outline: none; color: #2f3438; }
-.input-group input::placeholder { color: #bdbdbd; font-weight: 400; }
-.input-group input:first-child { border-bottom: 1px solid #dadce0; }
-.input-group input:focus { background-color: #fafafa; }
-
-.btn-login { width: 100%; padding: 18px; background-color: #1496f4; color: white; border: none; border-radius: 4px; font-size: 18px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-.btn-login:hover { background-color: #0b80d6; }
-
-.sub-links { display: flex; justify-content: center; align-items: center; gap: 24px; margin-top: 24px; font-size: 14px; color: #424242; }
-.sub-links a:hover { text-decoration: underline; }
-
-.sns-login-area { margin-top: 55px; text-align: center; width: 100%; }
-.sns-title { font-size: 13px; color: #757575; margin-bottom: 20px; }
-.sns-buttons { display: flex; justify-content: center; gap: 20px; margin-bottom: 40px; }
-.sns-btn { width: 54px; height: 54px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: opacity 0.2s; }
-.sns-btn:hover { opacity: 0.85; }
-.sns-btn.facebook { background-color: #3b5998; color: white; font-size: 30px; font-family: serif; font-style: italic; font-weight: bold; padding-top: 4px; padding-right: 2px; }
-.sns-btn.kakao { background-color: #fee500; color: #381e1f; font-size: 15px; font-weight: 900; }
-.sns-btn.naver { background-color: #03c75a; color: white; font-size: 22px; font-weight: 900; }
-
-.trouble-link { font-size: 14px; color: #9e9e9e; margin-bottom: 25px; display: block; text-align: center; }
-.trouble-link:hover { text-decoration: underline; }
-.divider { width: 100%; height: 1px; background-color: #eaedef; margin-bottom: 25px; }
-.guest-link { font-size: 14px; color: #424242; text-align: center; display: block; cursor: pointer; }
-.guest-link:hover { text-decoration: underline; }
-.copyright { position: absolute; bottom: 30px; font-size: 12px; color: #9e9e9e; text-align: center; width: 100%; }
-</style>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/auth/login.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
-<body>
+<body data-context-path="${pageContext.request.contextPath}">
 
     <div class="login-container">
         <a href="${pageContext.request.contextPath}/main.htm" class="logo-area">
@@ -86,76 +49,13 @@ form { width: 100%; }
 
             <a href="#" class="trouble-link">로그인에 문제가 있으신가요?</a>
             <div class="divider"></div>
-            <a href="/seller/login.htm" class="guest-link">오늘의 집 파트너 로그인</a>
+            <a href="${pageContext.request.contextPath}/seller/login.htm" class="guest-link">오늘의 집 파트너 로그인</a>
         </div>
     </div>
 
     <div class="copyright">© bucketplace, Co., Ltd.. All Rights Reserved</div>
 	
-<script>
-$(function () {
 
-    // 기존 로그인 실패 처리
-    const loginError = "${param.error}";
-
-    if (loginError === "true") {
-        alert("아이디 또는 비밀번호가 잘못되었습니다.\n다시 확인해주세요.");
-    }
-
-    // 로그인 버튼을 눌렀을 때 상태 확인
-    $("#loginForm").on("submit", function (event) {
-        event.preventDefault();
-
-        const form = this;
-        const id = $("#id").val().trim();
-
-        if (id === "") {
-            alert("아이디를 입력해주세요.");
-            $("#id").focus();
-            return;
-        }
-
-        $.ajax({
-            url: "${pageContext.request.contextPath}/auth/statusCheck.ajax",
-            type: "GET",
-            data: {
-                id: id
-            },
-            dataType: "json",
-
-            success: function (result) {
-
-                if (result.code === "WITHDRAWN") {
-                    alert("탈퇴한 회원입니다.");
-                    return;
-                }
-
-                if (result.code === "STOP") {
-                    alert("정지된 회원입니다.");
-                    return;
-                }
-
-                if (result.code === "NOT_FOUND") {
-                    alert("등록되지 않은 아이디입니다.");
-                    return;
-                }
-
-                if (result.code === "ACTIVE") {
-                    // 정상 회원인 경우에만 실제 로그인 요청
-                    form.submit();
-                    return;
-                }
-
-                alert("회원 상태를 확인할 수 없습니다.");
-            },
-
-            error: function (xhr) {
-                console.log(xhr.responseText);
-                alert("서버 통신 중 오류가 발생했습니다.");
-            }
-        });
-    });
-});
-</script>
+<script src="${pageContext.request.contextPath}/resources/js/auth/login.js"></script>
 </body>
 </html>

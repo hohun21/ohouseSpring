@@ -12,73 +12,9 @@
 <!-- 프리텐다드 폰트 적용 -->
 <link rel="stylesheet" as="style" crossorigin
 	href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-<style>
-* { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
-body { background-color: #fff; color: #2F3438; display: flex; flex-direction: column; align-items: center; padding-bottom: 80px; }
-a { text-decoration: none; color: inherit; }
-
-/* 좌측 상단 로고 */
-.header-logo { width: 100%; padding: 40px 0 0 60px; }
-.logo-area { display: inline-flex; align-items: center; cursor: pointer; }
-.logo-area svg { height: 42px; width: auto; } 
-
-/* 메인 컨테이너 */
-.signup-container { width: 100%; max-width: 440px; margin-top: 20px; }
-.page-title { font-size: 24px; font-weight: 700; text-align: left; margin-bottom: 40px; }
-
-/* SNS 간편 회원가입 */
-.sns-area { text-align: center; margin-bottom: 35px; }
-.sns-title { font-size: 13px; color: #757575; margin-bottom: 18px; }
-.sns-buttons { display: flex; justify-content: center; gap: 20px; }
-.sns-btn { width: 54px; height: 54px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; transition: opacity 0.2s; }
-.sns-btn:hover { opacity: 0.85; }
-.sns-btn.facebook { background-color: #3b5998; color: white; font-size: 30px; font-family: serif; font-style: italic; font-weight: bold; padding-top: 4px; padding-right: 2px; }
-.sns-btn.kakao { background-color: #FEE500; color: #381E1F; font-size: 15px; font-weight: 900; }
-.sns-btn.naver { background-color: #03C75A; color: white; font-size: 22px; font-weight: 900; }
-.divider { width: 100%; height: 1px; background-color: #EAEDEF; margin-bottom: 35px; }
-
-/* 폼 입력 영역 */
-.form-group { margin-bottom: 30px; }
-.label { display: block; font-size: 15px; font-weight: 700; margin-bottom: 12px; }
-.sub-text { font-size: 13px; color: #757575; margin-bottom: 10px; display: block; }
-.input-box { width: 100%; border: 1px solid #DADCE0; border-radius: 4px; padding: 15px; font-size: 16px; outline: none; color: #2F3438; }
-.input-box:focus { border-color: #1496f4; }
-.input-box::placeholder { color: #BDBDBD; }
-
-/* 아이디 및 버튼 그룹 */
-.id-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.id-wrap input { flex: 1; padding: 15px; border: 1px solid #DADCE0; border-radius: 4px; font-size: 16px; outline: none; color: #2F3438; }
-.id-wrap input:focus { border-color: #1496f4; }
-.btn-verify { width: 100px; padding: 15px 0; background-color: #F7F9FA; color: #757575; border: 1px solid #EAEDEF; border-radius: 4px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background-color 0.2s; }
-.btn-verify:hover { background-color: #F0F2F4; color: #424242; }
-
-/* 약관 동의 박스 */
-.terms-box { border: 1px solid #DADCE0; border-radius: 4px; padding: 0 18px; background: #fff; margin-bottom: 25px; }
-.term-item { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid #EAEDEF; font-size: 15px; color: #2F3438; cursor: pointer; }
-.term-item:last-child { border-bottom: none; }
-.term-left { display: flex; align-items: center; gap: 12px; }
-.term-left input[type="checkbox"] { width: 20px; height: 20px; accent-color: #1496f4; cursor: pointer; }
-.term-item.bold .term-left span { font-weight: 700; }
-.term-sub { font-size: 13px; color: #9E9E9E; font-weight: 400; margin-left: 6px; }
-.term-arrow { color: #BDBDBD; font-weight: 700; font-size: 16px; }
-
-/* 리캡챠 가짜 UI */
-.recaptcha-box { border: 1px solid #DADCE0; border-radius: 4px; background: #FAFAFA; padding: 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
-.recaptcha-left { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; }
-.recaptcha-checkbox { width: 28px; height: 28px; border: 2px solid #C1C1C1; border-radius: 2px; background: #fff; }
-.recaptcha-right { text-align: center; font-size: 11px; color: #9E9E9E; }
-.recaptcha-icon { font-size: 24px; margin-bottom: 4px; }
-
-/* 제출 버튼 */
-.btn-submit { width: 100%; padding: 18px; background-color: #1496f4; color: white; border: none; border-radius: 4px; font-size: 18px; font-weight: 700; cursor: pointer; margin-bottom: 25px; transition: background-color 0.2s; }
-.btn-submit:hover { background-color: #0b80d6; }
-
-/* 하단 링크 */
-.login-link, .seller-signup-link { text-align: center; font-size: 15px; color: #424242; margin-bottom: 10px; }
-.login-link a, .seller-signup-link a { font-weight: 700; text-decoration: underline; margin-left: 6px; }
-</style>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/auth/signup.css">
 </head>
-<body>
+<body data-context-path="${pageContext.request.contextPath}">
 
 	<header class="header-logo">
 		<a href="main.htm" class="logo-area">
@@ -92,6 +28,7 @@ a { text-decoration: none; color: inherit; }
 
 	<main class="signup-container">
 		<h1 class="page-title">회원가입</h1>
+		<c:if test="${not empty signupError}"><p class="sub-text form-error"><c:out value="${signupError}" /></p></c:if>
 
 		<div class="sns-area">
 			<div class="sns-title">SNS계정으로 간편하게 회원가입</div>
@@ -104,7 +41,7 @@ a { text-decoration: none; color: inherit; }
 
 		<div class="divider"></div>
 
-		<form action="${pageContext.request.contextPath}/auth/signup.htm" method="post">
+		<form id="signupForm" action="${pageContext.request.contextPath}/auth/signup.htm" method="post">
 			<!-- 아이디 -->
 			<div class="form-group">
 				<label class="label">아이디</label>
@@ -114,90 +51,16 @@ a { text-decoration: none; color: inherit; }
 				</div>
 				<p id="idCheck" class="sub-text"></p>
 				<c:if test="${errors.id}">
-					<p class="sub-text" style="color: red;">아이디를 입력해주세요.</p>
+					<p class="sub-text form-error">아이디를 입력해주세요.</p>
                 </c:if>
 			</div>
 			
-<script>
-$(function () {
-    const idRegex = /^[A-Za-z0-9_-]{4,20}$/;
-    const $id = $("input[name='id']");
-    const $idCheck = $("#idCheck");
-    const $btnIdCheck = $("#btnIDDuplicateCheck");
-    let idRequest = null;
 
-    $id.on("input", function () {
-        if (idRequest !== null) {
-            idRequest.abort();
-            idRequest = null;
-        }
-
-        const idVal = $.trim($id.val());
-        if (idVal === "") {
-            $idCheck.css("color", "red").text("아이디를 입력해주세요.");
-            return;
-        }
-        if (!idRegex.test(idVal)) {
-            $idCheck.css("color", "red").text("아이디는 영문, 숫자, 하이픈, 밑줄 4~20자만 가능합니다.");
-            return;
-        }
-        $idCheck.css("color", "").text("아이디 중복 확인이 필요합니다.");
-    });
-
-    $btnIdCheck.on("click", function () {
-        checkId();
-    });
-
-    function checkId() {
-        const idVal = $.trim($id.val());
-
-        if (idVal === "") {
-            $idCheck.css("color", "red").text("아이디를 입력해주세요.");
-            $id.trigger("focus");
-            return;
-        }
-        if (!idRegex.test(idVal)) {
-            $idCheck.css("color", "red").text("아이디는 영문, 숫자, 하이픈, 밑줄 4~20자만 가능합니다.");
-            $id.trigger("focus");
-            return;
-        }
-
-        $idCheck.css("color", "").text("아이디 중복 확인 중입니다.");
-        $btnIdCheck.prop("disabled", true);
-
-        idRequest = $.ajax({
-            url: "${pageContext.request.contextPath}/idcheck.ajax", // 백엔드 핸들러 주소 확인 필요
-            type: "GET",
-            dataType: "json",
-            data: { id: idVal }, // 백엔드로 id 파라미터 전달
-            cache: false,
-            success: function (data) {
-                const currentId = $.trim($id.val());
-                if (currentId !== idVal) return;
-
-                if (Number(data.count) === 0) {
-                    $idCheck.css("color", "green").text("사용 가능한 아이디입니다.");
-                } else {
-                    $idCheck.css("color", "red").text("이미 사용 중인 아이디입니다.");
-                }
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                if (textStatus === "abort") return;
-                $idCheck.css("color", "red").text("중복 확인 중 오류가 발생했습니다.");
-            },
-            complete: function () {
-                idRequest = null;
-                $btnIdCheck.prop("disabled", false);
-            }
-        });
-    }
-});
-</script>
 
 			<!-- 비밀번호 -->
 			<div class="form-group">
 				<label class="label">비밀번호</label> 
-                <span class="sub-text" id="pwdRegex" style="color: ${errors.invalidPassword ? 'red' : 'black'};">
+                <span class="sub-text" id="pwdRegex">
                     영문, 숫자를 포함한 8자 이상의 비밀번호를 입력해주세요.
                 </span> 
 				<input type="password" name="password" class="input-box" placeholder="비밀번호" required>
@@ -210,41 +73,7 @@ $(function () {
                 <input type="password" name="passwordConfirm" class="input-box" placeholder="비밀번호 확인" required>
 			</div>
 			
-<script>
-$(function () {
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z0-9!@#$%^&*()_+=?.-]{8,}$/;
 
-    $("input[name='password']").on("input", function () {
-        const password = $(this).val();
-        if (passwordRegex.test(password)) {
-            $("#pwdRegex").css("color", "green").text("사용 가능한 비밀번호입니다.");
-        } else {
-            $("#pwdRegex").css("color", "red").text("영문, 숫자를 포함한 8자 이상의 비밀번호를 입력해주세요.");
-        }
-        validatePasswordConfirmation();
-    });
-
-    $("input[name='passwordConfirm']").on("input", function () {
-        validatePasswordConfirmation();
-    });
-
-    function validatePasswordConfirmation() {
-        const password = $("input[name='password']").val();
-        const passwordConfirm = $("input[name='passwordConfirm']").val();
-
-        if (passwordConfirm.length === 0) {
-            $("#pwdCheck").css("color", "red").text("비밀번호를 다시 입력해주세요.");
-            return false;
-        }
-        if (password === passwordConfirm) {
-            $("#pwdCheck").css("color", "green").text("비밀번호가 일치합니다.");
-            return true;
-        }
-        $("#pwdCheck").css("color", "red").text("비밀번호가 일치하지 않습니다.");
-        return false;
-    }
-});
-</script>
 
 			<!-- 이름(별명) -->
 			<div class="form-group">
@@ -253,64 +82,7 @@ $(function () {
                 <input type="text" name="name" class="input-box" placeholder="이름 (2~20자)" required>
 			</div>
 			
-<script>
-$(function () {
-    const $name = $("input[name='name']");
-    const $nameCheck = $("#nameCheck");
-    let nameRequest = null;
 
-    $name.on("input", function () {
-        if (nameRequest !== null) {
-            nameRequest.abort();
-            nameRequest = null;
-        }
-        $nameCheck.css("color", "").text("다른 유저와 겹치지 않도록 입력해주세요. (2~20자)");
-    });
-
-    $name.on("blur", function () {
-        const nameVal = $(this).val().trim();
-        checkName(nameVal);
-    });
-
-    function checkName(nameVal) {
-        if (nameVal.length === 0) {
-            $nameCheck.css("color", "red").text("이름을 입력해주세요.");
-            return;
-        }
-        if (nameVal.length < 2 || nameVal.length > 20) {
-            $nameCheck.css("color", "red").text("이름은 2~20자로 입력해주세요.");
-            return;
-        }
-
-        $nameCheck.css("color", "").text("이름 중복 확인 중입니다.");
-
-        nameRequest = $.ajax({
-            url: "${pageContext.request.contextPath}/namecheck.ajax", // 백엔드 핸들러 주소 확인 필요
-            type: "GET",
-            dataType: "json",
-            data: { name: nameVal }, // 백엔드로 name 파라미터 전달
-            cache: false,
-            success: function (data) {
-                const currentName = $name.val().trim();
-                if (currentName !== nameVal) return;
-
-                if (Number(data.count) === 0) {
-                    $nameCheck.css("color", "green").text("사용 가능한 이름입니다.");
-                } else {
-                    $nameCheck.css("color", "red").text("사용 중인 이름입니다.");
-                }
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                if (textStatus === "abort") return;
-                $nameCheck.css("color", "red").text("이름 확인 중 오류가 발생했습니다.");
-            },
-            complete: function () {
-                nameRequest = null;
-            }
-        });
-    }
-});
-</script>
 			<!-- 약관 동의 -->
 			<div class="form-group">
 				<label class="label">약관동의</label>
@@ -322,12 +94,12 @@ $(function () {
 					</label> 
                     <label class="term-item">
 						<div class="term-left">
-							<input type="checkbox" name="agreeAge" required> <span>만 14세 이상입니다 <span class="term-sub" style="color: #1496f4;">(필수)</span></span>
+							<input type="checkbox" name="agreeAge" required> <span>만 14세 이상입니다 <span class="term-sub term-required">(필수)</span></span>
 						</div>
 					</label> 
                     <label class="term-item">
 						<div class="term-left">
-							<input type="checkbox" name="agreeTerms" required> <span>이용약관 <span class="term-sub" style="color: #1496f4;">(필수)</span></span>
+							<input type="checkbox" name="agreeTerms" required> <span>이용약관 <span class="term-sub term-required">(필수)</span></span>
 						</div> <span class="term-arrow">&gt;</span>
 					</label> 
                     <label class="term-item">
@@ -360,12 +132,13 @@ $(function () {
 		</form>
 
 		<div class="login-link">
-			이미 아이디가 있으신가요? <a href="login.htm">로그인</a>
+			이미 아이디가 있으신가요? <a href="${pageContext.request.contextPath}/auth/login.htm">로그인</a>
 		</div>
 		<div class="seller-signup-link">
 			오늘의집 파트너 가입 <a href="seller/signup.htm">회원가입</a>
 		</div>
 	</main>
 
+<script src="${pageContext.request.contextPath}/resources/js/auth/signup.js"></script>
 </body>
 </html>

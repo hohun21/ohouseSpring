@@ -38,7 +38,7 @@ public class CustomerUser extends User {
 	        true,                      // accountNonExpired
 	        true,                      // credentialsNonExpired
 	        true,                      // accountNonLocked
-	        memberVO.getAuthList().stream()
+	        (memberVO.getAuthList() == null ? java.util.Collections.<com.ohouse.web.domain.auth.AuthoritiesVO>emptyList() : memberVO.getAuthList()).stream()
 	            .map(auth -> new SimpleGrantedAuthority(auth.getAuthority()))
 	            .collect(Collectors.toList())
 	    );

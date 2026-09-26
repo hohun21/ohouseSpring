@@ -11,7 +11,7 @@
 	
 	<mvc:annotation-driven />
 	
-	<context:component-scan base-package="com.ohouse.web">
+	<context:component-scan base-package="com.ohouse.web" use-default-filters="false">
 	    <context:include-filter
 	        type="annotation"
 	        expression="org.springframework.stereotype.Controller" />
@@ -29,20 +29,4 @@
 	<mvc:resources mapping="/resources/**" location="/resources/" />
 	
 	<mvc:resources mapping="/images/**" location="/images/" />
-	
-	<!-- Tiles -->
-	<beans:bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
-		<beans:property name="definitions">
-			<beans:list>
-				<beans:value>/WEB-INF/tiles/tiles.xml</beans:value>
-			</beans:list>
-		</beans:property>
-	</beans:bean>
-	<beans:bean id="tilesViewResolver"
-		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		<beans:property name="viewClass"
-			value="org.springframework.web.servlet.view.tiles3.TilesView" />
-		<beans:property name="order" value="1" />
-	</beans:bean>
-	
 </beans>
