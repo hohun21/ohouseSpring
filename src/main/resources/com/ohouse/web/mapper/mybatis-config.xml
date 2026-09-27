@@ -6,7 +6,7 @@
 <configuration>
   <settings>
     <!-- 컬러명이 c_name 일 경우  cName 변환 -->
-    <setting name="mapUnderscoreToCamelCase" value="true"/>
+    <setting name="mapUnderscoreToCamelCase" value="false"/>
   </settings>
   <typeAliases>
     <!-- <typeAlias type="org.doit.ik.domain.DeptDTO" alias="DeptDTO" /> --> 

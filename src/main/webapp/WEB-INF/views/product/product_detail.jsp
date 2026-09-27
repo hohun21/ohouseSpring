@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
 <style>
@@ -625,10 +625,10 @@
 
             <!-- 2. 리뷰 -->
             <section id="detail-review" class="tab-content">
-                <jsp:include page="/WEB-INF/views/product/review/reviewList.jsp">
+               <%-- <jsp:include page="/WEB-INF/views/product/review/reviewList.jsp">
                     <jsp:param name="product_id" value="${pdto.productDTO.product_id}"/>
                     <jsp:param name="member_id" value="${memberId != null ? memberId : 2}"/>
-                </jsp:include>
+                </jsp:include>--%>
             </section>
 
             <!-- 3. 문의 -->
@@ -645,8 +645,8 @@
 
     </div>
 </div>
-<script src="${pageContext.request.contextPath}/js/productDetail.js"></script>
-<jsp:include page="/WEB-INF/views/product/review/reviewFormModal.jsp">
+<script src="${pageContext.request.contextPath}/resources/js/productDetail.js"></script>
+<<jsp:include page="/WEB-INF/views/product/review/reviewFormModal.jsp">
     <jsp:param name="productId" value="${pdto.productDTO.product_id}"/>
 </jsp:include>
 <jsp:include page="/WEB-INF/views/product/review/reviewEditModal.jsp">
@@ -658,5 +658,6 @@
         const category_id = $(this).data("category_id");
         location.href = `${pageContext.request.contextPath}/shopping/category/category.htm?category_id=\${category_id}`;
     })
+    const contextPath = "${pageContext.request.contextPath}";
 </script>
 <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>

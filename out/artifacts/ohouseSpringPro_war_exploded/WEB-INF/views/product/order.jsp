@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,7 +7,7 @@
     <title>주문서 | 오늘의집</title>
 
     <link rel="stylesheet"
-          href="${pageContext.request.contextPath}/resources/css/order.css">
+          href="${pageContext.request.contextPath}/css/order.css">
 </head>
 
 <body>
@@ -133,7 +132,7 @@
             <!-- ========================= -->
             <!-- 배송지  -->
             <!-- ========================= -->
-            <%--<section class="section">
+            <section class="section">
                 <h2 class="section-title">배송지</h2>
 
                 <c:choose>
@@ -195,12 +194,7 @@
                     </c:otherwise>
                 </c:choose>
 
-            </section>--%>
-            <input type="hidden" id="selectedAddressId" value="1">
-
-            <select id="orderRequestMsg">
-                <option value="">배송 요청사항 없음</option>
-            </select>
+            </section>
 
 
             <!-- ========================= -->
@@ -475,7 +469,7 @@
 <script>
     const member_id = "${sessionScope.authUser.id}";
 </script>
-<script src="${pageContext.request.contextPath}/resources/js/order.js"></script>
+<script src="${pageContext.request.contextPath}/js/order.js"></script>
 
 </body>
 </html>
