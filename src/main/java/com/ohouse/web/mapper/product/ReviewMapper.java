@@ -19,7 +19,7 @@ public interface ReviewMapper {
 
 		List<OptionFilterDTO> selectOptionFilterList(long productId) throws ClassNotFoundException, SQLException ;
 
-		boolean isReviewLiked(@Param("reviewId") int reviewId, @Param("memberId") int memberId) throws ClassNotFoundException, SQLException ;
+		int isReviewLiked(@Param("reviewId") int reviewId, @Param("memberId") int memberId) throws ClassNotFoundException, SQLException ;
 
 		int insertReviewLike(@Param("reviewId") int reviewId, @Param("memberId") int memberId) throws ClassNotFoundException, SQLException ;
 
@@ -53,21 +53,14 @@ public interface ReviewMapper {
 
 		boolean hasUserPurchased(@Param("memberId") int memberId, @Param("productId") long productId) throws ClassNotFoundException, SQLException ;
 
-		//int insertReview2(ReviewDTO reviewDTO); // backup
 
 		boolean hasUserReviewedProduct(@Param("memberId") long memberId, @Param("productId") long productId) throws ClassNotFoundException, SQLException ;
 
 		ReviewDTO findLatestOrderInfo(@Param("memberId") int memberId, @Param("productId") long productId) throws ClassNotFoundException, SQLException ;
 
-//	AdminReplyHandler
-//	DeleteReviewHandler
-//	EditReviewHandler
-//	HelpCountToggleHandler
-//	HideImageToggleHandler
-//	ReviewCheckHandler
-//	ReviewListHandler
-//	WriteReviewHandler.
-	
+		int saveAdminReply(@Param("reviewId") int reviewId, @Param("adminReply")String adminReply, @Param("isAdmin")boolean isAdmin) throws ClassNotFoundException, SQLException ;
+
+
 }	
 	
 	

@@ -112,7 +112,8 @@
 								</c:choose>
 
 								<!-- 관리자 전용 토글 버튼 -->
-								<c:if test="${isAdmin}">
+								<%--임시로 주석 <c:if test="${isAdmin}"> --%>
+								<c:if test="${1 eq 1}">
 									<div class="admin-control-wrap" style="margin-top: 5px;">
 										<button type="button" class="btn-admin-hide"
 											onclick="toggleHideImage(${review.reviewId}, ${review.isHideImage})">
@@ -160,7 +161,8 @@
 											오늘의 집 고객센터</span>
 
 										<%-- 💥 [수정] 문자열 "true"도 인식하도록 조건 통일 --%>
-										<c:if test="${isAdmin eq true or isAdmin eq 'true'}">
+										<%-- 임시!!! <c:if test="${isAdmin eq true or isAdmin eq 'true'}"> --%>
+										<c:if test="${1 eq 1}">
 											<div style="font-size: 11px;">
 												<a href="javascript:void(0);"
 													onclick="toggleReplyForm(${review.reviewId})"
@@ -177,7 +179,8 @@
 
 							<%-- 2. 답변이 없고 관리자인 경우: [답변 달기] 버튼 노출 --%>
 							<%-- 💥 [수정] isAdmin 조건 통일 --%>
-							<c:if test="${isAdmin and empty review.adminReply}">
+							<%-- <c:if test="${isAdmin and empty review.adminReply}"> --%>
+							<c:if test="${1 eq 1}">
 								<button type="button"
 									onclick="toggleReplyForm(${review.reviewId})"
 									style="padding: 4px 8px; font-size: 11px; color: #35c5f0; border: 1px solid #35c5f0; background: #fff; border-radius: 4px; cursor: pointer;">
@@ -185,7 +188,8 @@
 							</c:if>
 
 							<%-- 3. 관리자 전용 답변 작성/수정 폼 (기본 숨김) --%>
-							<c:if test="${isAdmin eq true or isAdmin eq 'true'}">
+							<%-- 임시 주석처리!!<c:if test="${isAdmin eq true or isAdmin eq 'true'}"> --%>
+							<c:if test="${1 eq 1}">
 								<div id="reply-form-${review.reviewId}"
 									style="display: none; margin-top: 8px; background: #f9f9f9; padding: 10px; border-radius: 4px;">
 									<textarea id="reply-input-${review.reviewId}" rows="3"

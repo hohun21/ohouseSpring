@@ -4,7 +4,7 @@
 
 <!-- CSS 불러오기 -->
 <link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/reviewList.css">
+	href="${pageContext.request.contextPath}/resources/css/reviewList.css">
 
 <style>
 /* 필터 및 드롭다운 기본 스타일 */
@@ -573,12 +573,12 @@
 
             var reviewId = likeBtn.getAttribute('data-review-id');
             if (!reviewId) return;
-
+            var contextPath = "${pageContext.request.contextPath}";
             // 💡 memberId 파라미터 제거 (서버 세션에서 처리하므로 review_id만 보내면 됨)
-            var url = '${pageContext.request.contextPath}/helpCountToggle.htm?review_id=' + reviewId;
+            var url = contextPath +'/review/helpCountToggle.htm?review_id=' + reviewId;
 
             fetch(url, {
-                method: 'GET',
+                method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(function (response) {
@@ -873,7 +873,7 @@ function toggleHideImage(reviewId, isHideImage) {
     // 1. 현재 상태가 1이면 0으로, 0이면 1로 반전 (토글 처리)
     const nextStatus = (isHideImage === 1) ? 0 : 1;
 
-    fetch('${pageContext.request.contextPath}/hideImageToggle.htm', {
+    fetch('${pageContext.request.contextPath}/review/hideImageToggle.htm', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json; charset=UTF-8'
@@ -932,7 +932,7 @@ function sendAdminReplyRequest(reviewId, adminReply) {
     params.append('reviewId', reviewId);
     params.append('adminReply', adminReply);
 
-    fetch('${pageContext.request.contextPath}/adminReply.htm', {
+    fetch('${pageContext.request.contextPath}/review/adminReply.htm', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -959,7 +959,7 @@ function sendAdminReplyRequest(reviewId, adminReply) {
 <script>
 //리뷰 작성 모달 열기
 function openReviewModal() {
-    const isLoggedIn = '${sessionScope.authUser}' !== '';
+    const isLoggedIn = true;//'${sessionScope.authUser}' !== '';
     if (!isLoggedIn) {
         if (confirm("로그인 후 이용할 수 있습니다. 로그인하시겠습니까?")) {
             // 현재 상세 페이지의 경로와 상품 번호 파라미터를 통째로 encode해서 전달

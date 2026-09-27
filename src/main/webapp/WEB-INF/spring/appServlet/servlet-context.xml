@@ -7,6 +7,7 @@
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/views/"/>
         <property name="suffix" value=".jsp"/>
+        
     </bean>
     <mvc:resources mapping="/resources/**" location="/resources/"/>
     <mvc:resources mapping="/images/**" location="/images/"/>
@@ -22,4 +23,10 @@
         <beans:property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView"/>
         <beans:property name="order" value="1"/>
     </beans:bean>
+    
+    <!-- 파일 업로드  -->
+    <beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+    </beans:bean>
+
+	
 </beans>

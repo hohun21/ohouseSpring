@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <!-- CSS 불러오기 -->
 <link rel="stylesheet"
-	href="${pageContext.request.contextPath}/css/reviewList.css">
+	href="${pageContext.request.contextPath}/resources/css/reviewList.css">
 
 <style>
 /* 필터 및 드롭다운 기본 스타일 */
@@ -575,10 +575,10 @@
             if (!reviewId) return;
 
             // 💡 memberId 파라미터 제거 (서버 세션에서 처리하므로 review_id만 보내면 됨)
-            var url = '${pageContext.request.contextPath}/helpCountToggle.htm?review_id=' + reviewId;
+            var url = '${pageContext.request.contextPath}/review/helpCountToggle.htm?review_id=' + reviewId;
 
             fetch(url, {
-                method: 'GET',
+                method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(function (response) {
@@ -804,8 +804,8 @@
 
  // 리뷰 AJAX Fetch 수정
     function triggerReviewFetch(page, sort) {
-        var productId = `${product_id}`;
-        var reqUrl = '${pageContext.request.contextPath}/review.htm?product_id=' + productId + '&sort=' + sort + '&page=' + page;
+        var productId = '3377041';//`${product_id}`; 임시!
+        var reqUrl = '${pageContext.request.contextPath}/review.htm?product_id=' +  productId + '&sort=' + sort + '&page=' + page;
 
         selectedRatingsSet.forEach(function(val) {
             reqUrl += '&ratings=' + encodeURIComponent(val);
