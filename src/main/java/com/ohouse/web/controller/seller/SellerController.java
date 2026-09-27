@@ -1,4 +1,3 @@
-/*
 package com.ohouse.web.controller.seller;
 
 import java.io.PrintWriter;
@@ -35,15 +34,15 @@ import com.ohouse.seller.service.SellerSignupRequest;
 import com.ohouse.seller.service.SellerSignupService;
 import com.ohouse.seller.service.SellerSignupStatusService;
 import com.ohouse.shopping.category.dao.CategoryDAOImple;
-import com.ohouse.shopping.category.dto.CategoryDTO;
-import com.ohouse.shopping.category.service.CategoryService;
 import com.ohouse.web.domain.seller.ProductDTO;
 import com.ohouse.web.domain.seller.ProductFormDTO;
 import com.ohouse.web.domain.seller.ProductOptionDTO;
 import com.ohouse.web.domain.seller.SellerAuthDTO;
 import com.ohouse.web.domain.seller.SellerOrderDTO;
+import com.ohouse.web.domain.shopping.category.CategoryDTO;
 import com.ohouse.web.service.seller.SellerOrderService;
 import com.ohouse.web.service.seller.SellerService;
+import com.ohouse.web.service.shopping.category.CategoryService;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -668,4 +667,3 @@ public class SellerController {
         return value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "\\r").replace("\n", "\\n");
     }
 }
-*/
