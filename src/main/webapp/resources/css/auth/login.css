@@ -34,3 +34,6 @@ form { width: 100%; }
 .guest-link { font-size: 14px; color: #424242; text-align: center; display: block; cursor: pointer; }
 .guest-link:hover { text-decoration: underline; }
 .copyright { position: absolute; bottom: 30px; font-size: 12px; color: #9e9e9e; text-align: center; width: 100%; }
+
+.remember-row { display: flex; align-items: center; gap: 8px; margin: -8px 0 20px; font-size: 14px; color: #424242; cursor: pointer; }
+.remember-row input { width: 16px; height: 16px; margin: 0; accent-color: #1496f4; }

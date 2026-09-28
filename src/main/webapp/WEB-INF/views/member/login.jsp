@@ -28,10 +28,11 @@
             <div class="input-group">
             	<input type="text" id="id" name="username" placeholder="아이디" required>
                 <input type="password" name="password" placeholder="비밀번호" required>
-            	<li><label for="remember-me">Remember-Me</label>
-					<input type="checkbox" id="remember-me" name="remember-me" class="text" />
-				</li>
             </div>
+            <label class="remember-row">
+			    <input type="checkbox" id="remember-me" name="remember-me">
+			    <span>로그인 상태 유지</span>
+			</label>
             <button type="submit" class="btn-login">로그인</button>
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         </form>
