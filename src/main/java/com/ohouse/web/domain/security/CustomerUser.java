@@ -45,7 +45,7 @@ public class CustomerUser extends User {
 
 	    this.member_vo = memberVO;
 
-	    log.info("❤️ CustomerUser : " + member_vo);
+	    log.info("CustomerUser authenticated: " + memberVO.getId());
 	}
 	
 	

@@ -12,4 +12,7 @@ public interface MemberAuthMapper {
     int countByName(@Param("name") String name);
     Integer getMemberId(@Param("id") String id);
     int insertCart(@Param("memberId") Integer memberId);
+    int updatePassword(@Param("id") String id, @Param("password") String password);
+    int upgradeLegacyPassword(@Param("id") String id, @Param("oldPassword") String oldPassword, @Param("password") String password);
+    int deletePersistentTokens(@Param("id") String id);
 }

@@ -35,12 +35,12 @@
 		<security:remember-me
 			data-source-ref="dataSource" token-validity-seconds="604800" />
 
-		<security:csrf disabled="true" />
+		<security:csrf request-matcher-ref="authCsrfMatcher" />
 	</security:http>
 
 	<!-- PasswordEncoder -->
 	<bean id="bCryptPasswordEncoder"
-		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder">
+		class="com.ohouse.web.security.LegacyPasswordEncoder">
 	</bean>
 
 	<!-- 사용자의 인증(ID/PW 확인)을 관리하는 태그 -->

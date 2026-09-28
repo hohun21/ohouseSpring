@@ -25,11 +25,13 @@ public class AuthController {
     private final MemberSignupService memberSignupService;
     private final MemberLoginService memberLoginService;
 
+
     @GetMapping("/signup.htm")
     public String signupForm() { return "member/signup"; }
 
     @PostMapping("/signup.htm")
     public String signup(MemberVO memberVO, @RequestParam String passwordConfirm,
+                         @RequestParam(required = false) String agreeAge, @RequestParam(required = false) String agreeTerms,
                          Model model, RedirectAttributes redirectAttributes) {
         String id = memberVO.getId() == null ? "" : memberVO.getId().trim();
         String name = memberVO.getName() == null ? "" : memberVO.getName().trim();
@@ -47,12 +49,19 @@ public class AuthController {
             model.addAttribute("signupError", "비밀번호 형식 또는 확인값을 확인해주세요.");
             return "member/signup";
         }
+        if (agreeAge == null || agreeTerms == null) {
+            model.addAttribute("signupError", "필수 약관에 동의해주세요.");
+            return "member/signup";
+        }
         memberVO.setId(id);
         memberVO.setName(name);
         try {
             memberSignupService.register(memberVO);
         } catch (IllegalArgumentException e) {
             model.addAttribute("signupError", e.getMessage());
+            return "member/signup";
+        } catch (org.springframework.dao.DataIntegrityViolationException | IllegalStateException e) {
+            model.addAttribute("signupError", "입력값이 중복되었거나 가입 처리에 실패했습니다. 다시 확인해주세요.");
             return "member/signup";
         }
         redirectAttributes.addFlashAttribute("result", 1);

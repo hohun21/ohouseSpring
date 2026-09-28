@@ -480,7 +480,8 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 	                                <a href="#">시공/생활 상담내역</a>
 	                                <a href="#">이벤트</a>
 	                                <hr>
-	                                <a href="${pageContext.request.contextPath}/logout.htm">로그아웃</a>
+	                                <a href="${pageContext.request.contextPath}/changePwd.htm">비밀번호 변경</a>
+	                                <form action="${pageContext.request.contextPath}/logout.htm" method="post"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><button type="submit">로그아웃</button></form>
 	                            </div>
 	                        </div>
 	                    </c:when>
@@ -496,8 +497,8 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 	                            </svg>
 	                        </a>
 	                        <div class="header-auth-nav">
-	                            <a href="${pageContext.request.contextPath}/login.htm">로그인</a>
-	                            <a href="${pageContext.request.contextPath}/signup.htm">회원가입</a>
+	                            <a href="${pageContext.request.contextPath}/auth/login.htm">로그인</a>
+	                            <a href="${pageContext.request.contextPath}/auth/signup.htm">회원가입</a>
 	                            <a href="#">고객센터</a>
 	                        </div>
 	                    </c:otherwise>

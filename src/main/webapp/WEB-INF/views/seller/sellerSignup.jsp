@@ -155,6 +155,8 @@ button, input, select { font-family: inherit; }
           method="post">
 
         <!-- 계정 정보 -->
+        <c:if test="${not empty errors}"><p class="field-error">입력값과 중복 여부를 다시 확인해주세요.</p></c:if>
+        <c:if test="${not empty signupError}"><p class="field-error"><c:out value="${signupError}"/></p></c:if>
         <section class="form-section">
             <h2>계정 정보</h2>
 
@@ -388,6 +390,7 @@ button, input, select { font-family: inherit; }
         <button type="submit" class="submit-button">
             입점 신청하기
         </button>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     </form>
 
     <p class="login-guide">
@@ -449,7 +452,7 @@ $(function () {
             url: contextPath + options.url,
             method: "POST",
             dataType: "json",
-            data: { [options.parameter]: value }
+            data: { [options.parameter]: value, "${_csrf.parameterName}": "${_csrf.token}" }
         }).done(function (result) {
             // DAO 응답 형식: {"count": 0}. 문자열 숫자도 안전하게 처리한다.
             const available = Number(result.count) === 0 && !result.code;

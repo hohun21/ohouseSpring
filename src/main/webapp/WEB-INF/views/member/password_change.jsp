@@ -75,6 +75,7 @@
     <div class="container">
         <div class="password-form-wrapper">
             
+            <c:if test="${not empty passwordError}"><p class="server-error"><c:out value="${passwordError}"/></p></c:if>
             <form action="${pageContext.request.contextPath}/changePwdPro.htm" method="post" id="passwordForm">
                 
                 <!-- 1. 현재 비밀번호 -->
@@ -101,6 +102,7 @@
 
                 <button type="submit" id="changeButton" class="btn-change" disabled>완료</button>
                 <div class="form-notice">비밀번호를 바꾸면 새 비밀번호로 다시 로그인해주세요.</div>
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             </form>
         </div>
     </div>
@@ -155,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch("${pageContext.request.contextPath}/checkCurrentPwd.ajax", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-            body: "currentPwd=" + encodeURIComponent(val)
+            body: "currentPwd=" + encodeURIComponent(val) + "&${_csrf.parameterName}=${_csrf.token}"
         })
         .then(response => response.json())
         .then(data => {

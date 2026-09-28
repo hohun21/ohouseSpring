@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -22,6 +23,7 @@
             </svg>
         </a>
 
+        <c:if test="${passwordChanged}"><p>비밀번호가 변경되었습니다. 다시 로그인해주세요.</p></c:if>
         <form id="loginForm" action="${pageContext.request.contextPath}/auth/login" method="post">
             <div class="input-group">
             	<input type="text" id="id" name="username" placeholder="아이디" required>

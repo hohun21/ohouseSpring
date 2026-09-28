@@ -51,4 +51,23 @@
 		SELECT status FROM member WHERE id = #{id}
 	</select>
 
+	<select id="countByName" resultType="int">
+		SELECT COUNT(*) FROM member WHERE name = #{name}
+	</select>
+	<select id="getMemberId" resultType="java.lang.Integer">
+		SELECT member_id FROM member WHERE id = #{id}
+	</select>
+	<insert id="insertCart">
+		INSERT INTO cart (member_id, total_price) VALUES (#{memberId}, 0)
+	</insert>
+	<update id="updatePassword">
+		UPDATE member SET password = #{password} WHERE id = #{id} AND status = 1
+	</update>
+	<update id="upgradeLegacyPassword">
+		UPDATE member SET password = #{password} WHERE id = #{id} AND password = #{oldPassword}
+	</update>
+	<delete id="deletePersistentTokens">
+		DELETE FROM persistent_logins WHERE username = #{id}
+	</delete>
+
 </mapper>
