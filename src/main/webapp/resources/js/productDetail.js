@@ -103,7 +103,7 @@ function findProductOption() {
         });
 
         fetch(
-            "productOption.htm?product_id=" +
+            "productOption.htm?product_id="+
             encodeURIComponent(product_id) +
             "&option_value_ids=" +
             encodeURIComponent(option_value_ids.join(","))
@@ -215,6 +215,11 @@ function createSelectedOption(data, names, option_value_ids) {
     const selectedOptionValueIds = option_value_ids.map(Number);
     const maxStock = Number(data.stock);
 
+    console.log("★★★★★ productOption 응답");
+    console.log(data);
+    console.log("brand_name =", data.brand_name);
+
+
     const options =
         selects
             .filter(function (select) {
@@ -251,6 +256,9 @@ function createSelectedOption(data, names, option_value_ids) {
         options: options
     };
     selectOptionData.push(optionData);
+
+    console.log("★★★★★ 저장된 주문 데이터");
+    console.log(selectOptionData);
 
     const selectedList = document.getElementById("selectedList");
     if (!selectedList) return;
@@ -421,7 +429,10 @@ $(".cart").on("click", async function () {
             throw new Error(`장바구니 전송 실패 (${response.status})`);
         }
 
-        location.href = "/cart/cart.htm";
+        console.log("장바구니 추가 성공");
+        console.log("이동 주소:", contextPath + "/cart/cart.htm");
+
+        location.href = contextPath + "/cart/cart.htm";
 
     } catch (error) {
         console.error("장바구니 처리 오류:", error);
@@ -435,7 +446,8 @@ $(".buy").on("click", async function () {
     }
 
     try {
-        const response = await fetch("/productOrder.htm", {
+
+        const response = await fetch("/order/productOrder.htm", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -539,7 +551,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const imageUrl = decodeURIComponent(urlParams.get("imageUrl") || "");
         const productId = urlParams.get("product_id");
 
-        
         if (typeof openEditReviewModal === "function") {
             openEditReviewModal(reviewId, rating, content, imageUrl);
         }
