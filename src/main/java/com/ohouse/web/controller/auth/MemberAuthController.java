@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ohouse.web.domain.member.MemberVO;
-import com.ohouse.web.service.auth.MemberLoginService;
-import com.ohouse.web.service.auth.MemberSignupService;
+import com.ohouse.web.service.auth.MemberAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 
@@ -21,10 +20,8 @@ import lombok.extern.log4j.Log4j;
 @Log4j
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-public class AuthController {
-    private final MemberSignupService memberSignupService;
-    private final MemberLoginService memberLoginService;
-
+public class MemberAuthController {
+    private final MemberAuthService memberAuthService;
 
     @GetMapping("/signup.htm")
     public String signupForm() { return "member/signup"; }
@@ -56,7 +53,7 @@ public class AuthController {
         memberVO.setId(id);
         memberVO.setName(name);
         try {
-            memberSignupService.register(memberVO);
+        	memberAuthService.register(memberVO);
         } catch (IllegalArgumentException e) {
             model.addAttribute("signupError", e.getMessage());
             return "member/signup";
@@ -84,7 +81,7 @@ public class AuthController {
         if (!value.matches("[A-Za-z0-9_-]{4,20}")) {
             result.put("count", 1); result.put("code", "INVALID_ID"); return result;
         }
-        result.put("count", memberLoginService.idExists(value) ? 1 : 0);
+        result.put("count", memberAuthService.idExists(value) ? 1 : 0);
         return result;
     }
 
@@ -96,7 +93,7 @@ public class AuthController {
         if (value.length() < 2 || value.length() > 20) {
             result.put("count", 1); result.put("code", "INVALID_NAME"); return result;
         }
-        result.put("count", memberLoginService.nameExists(value) ? 1 : 0);
+        result.put("count", memberAuthService.nameExists(value) ? 1 : 0);
         return result;
     }
 
@@ -108,7 +105,7 @@ public class AuthController {
             result.put("success", false); result.put("status", null);
             result.put("code", "INVALID_ID"); return result;
         }
-        Integer status = memberLoginService.statusCheck(id.trim());
+        Integer status = memberAuthService.statusCheck(id.trim());
         result.put("status", status);
         if (status == null) { result.put("success", false); result.put("code", "NOT_FOUND"); }
         else if (status == 0) { result.put("success", true); result.put("code", "WITHDRAWN"); }

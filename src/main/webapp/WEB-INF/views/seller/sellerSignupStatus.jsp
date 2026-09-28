@@ -423,7 +423,7 @@ $(function () {
          */
         $.ajax({
             url: contextPath
-                    + "/seller/sellerSignupStatus.htm",
+                    + "/seller/sellerSignupStatus.ajax",
 
             type: "POST",
             dataType: "json",

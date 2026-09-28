@@ -5,14 +5,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ohouse.web.domain.member.MemberVO;
 import com.ohouse.web.mapper.auth.MemberAuthMapper;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class MemberSignupService {
+public class MemberAuthService {
     private final MemberAuthMapper memberAuthMapper;
     private final PasswordEncoder passwordEncoder;
 
+    public Integer statusCheck(String id) { return memberAuthMapper.statusCheck(id); }
+    public boolean idExists(String id) { return memberAuthMapper.getMember(id) != null; }
+    public boolean nameExists(String name) { return memberAuthMapper.countByName(name) > 0; }
+    
     @Transactional
     public void register(MemberVO memberVO) {
         if (memberAuthMapper.getMember(memberVO.getId()) != null)
