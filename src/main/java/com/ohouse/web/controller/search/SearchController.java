@@ -1,6 +1,8 @@
 package com.ohouse.web.controller.search;
 
 import java.util.List;
+
+import com.google.gson.Gson;
 import com.ohouse.web.domain.search.KeyWordDTO;
 import com.ohouse.web.domain.search.ProductSearchDTO;
 import com.ohouse.web.service.search.SearchService;
@@ -39,8 +41,11 @@ public class SearchController {
     }
 
     @ResponseBody
-    @GetMapping("/search/top10.ajax")
-    public List<KeyWordDTO> getTop10Keywords() {
-        return searchService.getTop10Keywords();
+    @GetMapping(value = "/search/top10.ajax", produces = "application/json; charset=UTF-8")
+    public String getTop10Keywords() {
+
+        List<KeyWordDTO> top10List = searchService.getTop10Keywords();
+        
+        return new Gson().toJson(top10List);
     }
 }

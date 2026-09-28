@@ -19,7 +19,7 @@ public class MainController {
     private final MainService mainService;
     private final CategoryService categoryService;
 
-    @GetMapping({"/", "/main.htm"}) 
+    @GetMapping("/main.htm") 
     public String mainPage(Model model) throws Exception {
 
         List<ProductSearchDTO> randomProductList = mainService.getRandomProductList();

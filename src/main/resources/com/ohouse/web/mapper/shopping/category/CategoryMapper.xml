@@ -11,7 +11,7 @@
 		<result property="sortOrder" column="sort_order"/>
 	</resultMap>
 	
-	<select id="getAllcategories" resultMap="categoryResultMap">
+	<select id="getAllCategories" resultMap="categoryResultMap">
 				SELECT category_id,
 	                   category_name,
 	                   parent_id,
