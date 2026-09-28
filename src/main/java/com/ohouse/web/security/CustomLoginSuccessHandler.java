@@ -48,6 +48,6 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         String role = roleNames.contains("ROLE_ADMIN") ? "ADMIN" : "USER";
         request.getSession().setAttribute("authUser", new com.ohouse.web.domain.auth.AuthUser(
                 member.getMemberId(), member.getId(), member.getName(), role));
-        response.sendRedirect(request.getContextPath() + "/member/myPage.htm");
+        response.sendRedirect(request.getContextPath() + "/main.htm");
 	}
 }

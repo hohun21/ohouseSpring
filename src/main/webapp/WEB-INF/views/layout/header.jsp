@@ -760,13 +760,13 @@ button {
 							</ul>
 						</div>
 					</div>
-					<a href="${pageContext.request.contextPath}/best.htm"
+					<a href="${pageContext.request.contextPath}/shopping/best.htm"
 						class="${activeMenu == 'best' ? 'active' : ''}"> 베스트 </a> <a
 						href="#">오늘의딜</a> <a
-						href="${pageContext.request.contextPath}/only.htm"
+						href="${pageContext.request.contextPath}/shopping/only.htm"
 						class="${activeMenu == 'only' ? 'active' : ''}"> 단독상품 </a> <a
 						href="#">집요한세일</a> <a href="#">오마트</a> <a
-						href="${pageContext.request.contextPath}/desiredDelivery.htm"
+						href="${pageContext.request.contextPath}/shopping/desiredDelivery.htm"
 						class="${activeMenu == 'desiredDelivery' ? 'active' : ''}">
 						원하는날도착 </a> <a href="#">오!쇼룸</a> <a href="#">기획전</a>
 				</nav>

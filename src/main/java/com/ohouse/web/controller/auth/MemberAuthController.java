@@ -2,6 +2,16 @@ package com.ohouse.web.controller.auth;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,15 +31,18 @@ import lombok.extern.log4j.Log4j;
 @RequiredArgsConstructor
 @RequestMapping("/auth")
 public class MemberAuthController {
+	
     private final MemberAuthService memberAuthService;
-
+    private final AuthenticationManager authenticationManager;
+    
     @GetMapping("/signup.htm")
     public String signupForm() { return "member/signup"; }
 
     @PostMapping("/signup.htm")
     public String signup(MemberVO memberVO, @RequestParam String passwordConfirm,
                          @RequestParam(required = false) String agreeAge, @RequestParam(required = false) String agreeTerms,
-                         Model model, RedirectAttributes redirectAttributes) {
+                         Model model, HttpServletRequest request, 
+                         RedirectAttributes redirectAttributes) {
         String id = memberVO.getId() == null ? "" : memberVO.getId().trim();
         String name = memberVO.getName() == null ? "" : memberVO.getName().trim();
         String password = memberVO.getPassword() == null ? "" : memberVO.getPassword();
@@ -54,13 +67,33 @@ public class MemberAuthController {
         memberVO.setName(name);
         try {
         	memberAuthService.register(memberVO);
+        	// password는 register() 호출 전에 보관한 원문 비밀번호 변수
+        	Authentication authentication = authenticationManager.authenticate(
+        	    new UsernamePasswordAuthenticationToken(id, password)
+        	);
+
+        	// 기존 세션을 폐기하고 새 세션에서 로그인 상태 시작
+        	HttpSession oldSession = request.getSession(false);
+        	if (oldSession != null) oldSession.invalidate();
+
+        	SecurityContext context = SecurityContextHolder.createEmptyContext();
+        	context.setAuthentication(authentication);
+        	SecurityContextHolder.setContext(context);
+
+        	HttpSession session = request.getSession(true);
+        	session.setAttribute(
+        	    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        	    context
+        	);
         } catch (IllegalArgumentException e) {
             model.addAttribute("signupError", e.getMessage());
             return "member/signup";
+            
         } catch (org.springframework.dao.DataIntegrityViolationException | IllegalStateException e) {
             model.addAttribute("signupError", "입력값이 중복되었거나 가입 처리에 실패했습니다. 다시 확인해주세요.");
             return "member/signup";
         }
+        
         redirectAttributes.addFlashAttribute("result", 1);
         return "redirect:/main.htm";
     }

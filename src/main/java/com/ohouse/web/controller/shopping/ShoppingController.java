@@ -1,15 +1,17 @@
 package com.ohouse.web.controller.shopping;
 
-import com.ohouse.web.service.shopping.FeaturedProductService;
+import com.ohouse.web.service.shopping.ShoppingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequiredArgsConstructor
-public class FeaturedProductController {
-    private final FeaturedProductService service;
+@RequestMapping("/shopping")
+public class ShoppingController {
+    private final ShoppingService service;
 
     @GetMapping("/best.htm")
     public String best(Model model) {
@@ -22,5 +24,10 @@ public class FeaturedProductController {
         model.addAttribute("products", service.only());
         model.addAttribute("activeMenu", "only");
         return "shopping/only/only";
+    }
+    @GetMapping("/desiredDelivery.htm")
+    public String desiredDelivery(Model model) {
+    	model.addAttribute("activeMenu", "desiredDelivery");
+    	return "shopping/desiredDelivery/desired_delivery";
     }
 }
