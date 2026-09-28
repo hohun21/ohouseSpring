@@ -68,9 +68,8 @@ public class SellerAuthController {
 		}
 
 		try {
-
 			SellerDTO seller = service.authenticate(email.trim(), password, normalized);
-			// Create a fresh session after all three credentials have been checked.
+			
 			HttpSession old = request.getSession(false);
 			if (old != null) old.invalidate();
 
@@ -83,10 +82,10 @@ public class SellerAuthController {
 			SecurityContextHolder.setContext(context);
 
 			session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+			
 			return "redirect:/main.htm";
 
 		} catch (IllegalArgumentException | IllegalStateException e) {
-
 			model.addAttribute("email", email);
 			model.addAttribute("businessNumber", normalized);
 			model.addAttribute("loginError", e.getMessage());

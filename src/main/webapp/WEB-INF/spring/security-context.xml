@@ -13,8 +13,19 @@
 
 	<!-- 웹 요청에 Spring Security 보안 설정을 적용하는 태그 -->
 	<security:http use-expressions="true">
-		<security:intercept-url pattern="/**"
-			access="permitAll" />
+		<security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+
+		<security:intercept-url pattern="/seller/login.htm" access="permitAll" />
+    	<security:intercept-url pattern="/seller/signup.htm" access="permitAll" />
+    	<security:intercept-url pattern="/seller/sellerSignupStatus.htm" access="permitAll" />
+    	<security:intercept-url pattern="/seller/sellerStatusCheck.ajax" access="permitAll" />
+    	<security:intercept-url pattern="/seller/*.ajax" access="permitAll" />
+
+		<security:intercept-url pattern="/seller/**" access="hasRole('ROLE_SELLER')" />
+
+		<security:intercept-url pattern="/member/**" access="isAuthenticated()" />
+
+		<security:intercept-url pattern="/**" access="permitAll" />
 
 		<!-- 폼 방식의 로그인 기능을 설정하는 태그 -->
 		<security:form-login login-page="/auth/login.htm"

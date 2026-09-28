@@ -144,7 +144,7 @@ public class AdminController {
         return "admin/pending_seller_list";
     }
 
-    @GetMapping("/approveSeller.htm")
+    @PostMapping("/approveSeller.htm")
     public String approveSeller(
             @RequestParam("sellerId") int sellerId,
             @RequestParam("action") String action

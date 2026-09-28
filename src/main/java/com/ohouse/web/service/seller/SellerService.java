@@ -32,8 +32,9 @@ public class SellerService {
     // 2. 상품 등록 로직
     @Transactional
     public int registerProduct(ProductFormDTO form) {
-        int brandId = sellerMapper.getBrandId(form.getBrandName());
-        if (brandId == -1) {
+        // 💡 int -> Integer 및 null 체크로 변경
+        Integer brandId = sellerMapper.getBrandId(form.getBrandName());
+        if (brandId == null) {
             throw new RuntimeException("등록된 브랜드 정보를 찾을 수 없습니다: " + form.getBrandName());
         }
         
@@ -174,8 +175,9 @@ public class SellerService {
     // 3. 상품 수정 로직 (ORA-02292 무결성 에러 예외 처리 반영)
     @Transactional(rollbackFor = Exception.class)
     public boolean updateProduct(ProductFormDTO form) {
-        int brandId = sellerMapper.getBrandId(form.getBrandName());
-        if (brandId == -1) {
+        // 💡 int -> Integer 및 null 체크로 변경
+        Integer brandId = sellerMapper.getBrandId(form.getBrandName());
+        if (brandId == null) {
             throw new RuntimeException("등록된 브랜드 정보를 찾을 수 없습니다: " + form.getBrandName());
         }
         
@@ -339,7 +341,15 @@ public class SellerService {
     // 6. 판매자 대시보드 통계
     public Map<String, Integer> getDashboardStats(String brandName) {
         Map<String, Integer> stats = new HashMap<>();
-        int brandId = sellerMapper.getBrandId(brandName);
+        Integer brandId = sellerMapper.getBrandId(brandName);
+        
+        if (brandId == null) {
+            stats.put("totalCount", 0);
+            stats.put("soldOutCount", 0);
+            stats.put("onSaleCount", 0);
+            stats.put("stopCount", 0);
+            return stats;
+        }
         
         int totalCount = sellerMapper.getTotalProductCount(brandId);
         int soldOutCount = sellerMapper.getSoldOutProductCount(brandId);
@@ -374,8 +384,8 @@ public class SellerService {
     
     public List<ProductDTO> getProductListByBrandName(String brandName) {
         List<ProductDTO> list = new ArrayList<>();
-        int brandId = sellerMapper.getBrandId(brandName);
-        if (brandId != -1) {
+        Integer brandId = sellerMapper.getBrandId(brandName);
+        if (brandId != null) {
             list = sellerMapper.getProductListByBrandId(brandId);
         }
         return list;
