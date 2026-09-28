@@ -86,7 +86,15 @@
         VALUES (option_value_seq.NEXTVAL, #{optionGroupId}, #{optionName}, #{sortOrder})
     </insert>
 
-    <select id="getOptionGroups" resultType="com.ohouse.web.domain.seller.OptionGroupDTO">
+    <resultMap id="optionGroupResultMap" type="com.ohouse.web.domain.seller.OptionGroupDTO">
+        <id property="optionGroupId" column="option_group_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="required" column="required"/>
+    </resultMap>
+
+    <select id="getOptionGroups" resultMap="optionGroupResultMap">
         SELECT option_group_id AS optionGroupId, product_id AS productId, group_name AS groupName, sort_order AS sortOrder, required 
         FROM option_group 
         WHERE product_id = #{productId} 
@@ -128,7 +136,18 @@
         VALUES (product_option_value_seq.NEXTVAL, #{productOptionId}, #{optionValueId})
     </insert>
 
-    <select id="getProductOptions" resultType="com.ohouse.web.domain.seller.ProductOptionDTO">
+    <!-- 💡 1. ProductOptionDTO를 위한 명시적 resultMap 추가 -->
+    <resultMap id="productOptionResultMap" type="com.ohouse.web.domain.seller.ProductOptionDTO">
+        <id property="productOptionId" column="product_option_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="sku" column="sku"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <!-- 💡 2. resultType 대신 resultMap 적용 -->
+    <select id="getProductOptions" resultMap="productOptionResultMap">
         SELECT product_option_id AS productOptionId, product_id AS productId, sku, price, stock, status 
         FROM product_option 
         WHERE product_id = #{productId} 
@@ -197,11 +216,11 @@
     </update>
 
     <update id="updateOptionPriceAndStock">
-	    UPDATE product_option 
-	    SET price = #{price}, 
-	        stock = #{stock}, 
-	        status = CASE WHEN #{stock} = 0 THEN 'SOLD_OUT' ELSE 'ACTIVE' END 
-	    WHERE product_id = #{productId} AND sku = #{skuName}
-	</update>
+        UPDATE product_option 
+        SET price = #{price}, 
+            stock = #{stock}, 
+            status = CASE WHEN #{stock} = 0 THEN 'SOLD_OUT' ELSE 'ACTIVE' END 
+        WHERE product_id = #{productId} AND sku = #{skuName}
+    </update>
 
 </mapper>

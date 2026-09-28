@@ -2,6 +2,16 @@ package com.ohouse.web.controller.auth;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,8 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ohouse.web.domain.member.MemberVO;
-import com.ohouse.web.service.auth.MemberLoginService;
-import com.ohouse.web.service.auth.MemberSignupService;
+import com.ohouse.web.service.auth.MemberAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 
@@ -21,18 +30,19 @@ import lombok.extern.log4j.Log4j;
 @Log4j
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-public class AuthController {
-    private final MemberSignupService memberSignupService;
-    private final MemberLoginService memberLoginService;
-
-
+public class MemberAuthController {
+	
+    private final MemberAuthService memberAuthService;
+    private final AuthenticationManager authenticationManager;
+    
     @GetMapping("/signup.htm")
     public String signupForm() { return "member/signup"; }
 
     @PostMapping("/signup.htm")
     public String signup(MemberVO memberVO, @RequestParam String passwordConfirm,
                          @RequestParam(required = false) String agreeAge, @RequestParam(required = false) String agreeTerms,
-                         Model model, RedirectAttributes redirectAttributes) {
+                         Model model, HttpServletRequest request, 
+                         RedirectAttributes redirectAttributes) {
         String id = memberVO.getId() == null ? "" : memberVO.getId().trim();
         String name = memberVO.getName() == null ? "" : memberVO.getName().trim();
         String password = memberVO.getPassword() == null ? "" : memberVO.getPassword();
@@ -56,14 +66,34 @@ public class AuthController {
         memberVO.setId(id);
         memberVO.setName(name);
         try {
-            memberSignupService.register(memberVO);
+        	memberAuthService.register(memberVO);
+        	// password는 register() 호출 전에 보관한 원문 비밀번호 변수
+        	Authentication authentication = authenticationManager.authenticate(
+        	    new UsernamePasswordAuthenticationToken(id, password)
+        	);
+
+        	// 기존 세션을 폐기하고 새 세션에서 로그인 상태 시작
+        	HttpSession oldSession = request.getSession(false);
+        	if (oldSession != null) oldSession.invalidate();
+
+        	SecurityContext context = SecurityContextHolder.createEmptyContext();
+        	context.setAuthentication(authentication);
+        	SecurityContextHolder.setContext(context);
+
+        	HttpSession session = request.getSession(true);
+        	session.setAttribute(
+        	    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        	    context
+        	);
         } catch (IllegalArgumentException e) {
             model.addAttribute("signupError", e.getMessage());
             return "member/signup";
+            
         } catch (org.springframework.dao.DataIntegrityViolationException | IllegalStateException e) {
             model.addAttribute("signupError", "입력값이 중복되었거나 가입 처리에 실패했습니다. 다시 확인해주세요.");
             return "member/signup";
         }
+        
         redirectAttributes.addFlashAttribute("result", 1);
         return "redirect:/main.htm";
     }
@@ -84,7 +114,7 @@ public class AuthController {
         if (!value.matches("[A-Za-z0-9_-]{4,20}")) {
             result.put("count", 1); result.put("code", "INVALID_ID"); return result;
         }
-        result.put("count", memberLoginService.idExists(value) ? 1 : 0);
+        result.put("count", memberAuthService.idExists(value) ? 1 : 0);
         return result;
     }
 
@@ -96,7 +126,7 @@ public class AuthController {
         if (value.length() < 2 || value.length() > 20) {
             result.put("count", 1); result.put("code", "INVALID_NAME"); return result;
         }
-        result.put("count", memberLoginService.nameExists(value) ? 1 : 0);
+        result.put("count", memberAuthService.nameExists(value) ? 1 : 0);
         return result;
     }
 
@@ -108,7 +138,7 @@ public class AuthController {
             result.put("success", false); result.put("status", null);
             result.put("code", "INVALID_ID"); return result;
         }
-        Integer status = memberLoginService.statusCheck(id.trim());
+        Integer status = memberAuthService.statusCheck(id.trim());
         result.put("status", status);
         if (status == null) { result.put("success", false); result.put("code", "NOT_FOUND"); }
         else if (status == 0) { result.put("success", true); result.put("code", "WITHDRAWN"); }

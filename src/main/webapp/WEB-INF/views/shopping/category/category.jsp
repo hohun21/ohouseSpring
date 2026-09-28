@@ -6,7 +6,7 @@
 <jsp:include page="/WEB-INF/views/layout/header.jsp">
   <jsp:param name="showSubHeaderAtTop" value="false"/>
 </jsp:include>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/category.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/category.css" />
 
 <!-- 2단 분할 메인 컨텐츠 시작 -->
 <main class="container category-layout">

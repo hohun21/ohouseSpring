@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ohouse.web.mapper.seller.SellerAuthMapper">
+<mapper namespace="com.ohouse.web.mapper.auth.SellerAuthMapper">
  
   <resultMap id="sellerMap" type="com.ohouse.web.domain.seller.SellerDTO">
     <id property="sellerId" column="seller_id"/>
@@ -27,11 +27,12 @@
   <select id="countMailOrder" resultType="int">SELECT COUNT(*) FROM seller WHERE mail_order_number = #{mailOrderNumber}</select>
   
   <insert id="insertSeller" parameterType="com.ohouse.web.domain.seller.SellerDTO">
-    <selectKey keyProperty="sellerId" resultType="int" order="BEFORE">SELECT seq_seller.NEXTVAL FROM dual</selectKey>
-    INSERT INTO seller (seller_id, email, password, business_number, representative_name,
-        mail_order_number, business_address, representative_contact, customer_service_phone, status)
-    VALUES (#{sellerId}, #{email}, #{password}, #{businessNumber}, #{representativeName},
-        #{mailOrderNumber}, #{businessAddress}, #{representativeContact}, #{customerServicePhone}, 'PENDING')
+    <selectKey keyProperty="sellerId" resultType="int" order="BEFORE">
+	    SELECT seq_seller.NEXTVAL FROM dual</selectKey>
+	    INSERT INTO seller (seller_id, email, password, business_number, representative_name,
+	        mail_order_number, business_address, representative_contact, customer_service_phone, status)
+	    VALUES (#{sellerId}, #{email}, #{password}, #{businessNumber}, #{representativeName},
+	        #{mailOrderNumber}, #{businessAddress}, #{representativeContact}, #{customerServicePhone}, 'PENDING')
   </insert>
   
   <insert id="insertBrand">

@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 public class AuthCsrfMatcher implements RequestMatcher {
     private final Set<String> paths = new HashSet<>(Arrays.asList(
             "/auth/login", "/auth/signup.htm", "/seller/signup.htm", "/seller/login.htm",
-            "/seller/sellerSignupStatus.htm", "/emailcheck.ajax", "/brandnamecheck.ajax",
-            "/businessnumbercheck.ajax", "/mailordernumbercheck.ajax", "/checkCurrentPwd.ajax",
+            "/seller/sellerSignupStatus.ajax", "/seller/emailcheck.ajax", "/seller/brandnamecheck.ajax",
+            "/seller/businessnumbercheck.ajax", "/seller/mailordernumbercheck.ajax", "/checkCurrentPwd.ajax",
             "/changePwdPro.htm", "/logout.htm"));
     @Override
     public boolean matches(HttpServletRequest request) {

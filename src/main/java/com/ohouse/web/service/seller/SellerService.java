@@ -32,8 +32,8 @@ public class SellerService {
     // 2. 상품 등록 로직
     @Transactional
     public int registerProduct(ProductFormDTO form) {
-        int brandId = sellerMapper.getBrandId(form.getBrandName());
-        if (brandId == -1) {
+        Integer brandId = sellerMapper.getBrandId(form.getBrandName());
+        if (brandId == null) {
             throw new RuntimeException("등록된 브랜드 정보를 찾을 수 없습니다: " + form.getBrandName());
         }
         
@@ -174,8 +174,8 @@ public class SellerService {
     // 3. 상품 수정 로직 (ORA-02292 무결성 에러 예외 처리 반영)
     @Transactional(rollbackFor = Exception.class)
     public boolean updateProduct(ProductFormDTO form) {
-        int brandId = sellerMapper.getBrandId(form.getBrandName());
-        if (brandId == -1) {
+        Integer brandId = sellerMapper.getBrandId(form.getBrandName());
+        if (brandId == null) {
             throw new RuntimeException("등록된 브랜드 정보를 찾을 수 없습니다: " + form.getBrandName());
         }
         
@@ -270,10 +270,8 @@ public class SellerService {
             if (e.getMessage() != null && e.getMessage().contains("2292")) {
                 System.out.println("주문 내역 발견! 옵션 삭제 취소 후 가격/재고 UPDATE 모드로 진입합니다.");
                 
-                // 스프링 트랜잭션 수동 롤백 유도 (이후 플랜 B 수행)
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 
-                // 플랜 B 수행 (재고 및 가격 업데이트)
                 sellerMapper.resetAllOptionStocksToZero(form.getProductId());
 
                 if (form.getSkuNames() != null) {
@@ -298,7 +296,7 @@ public class SellerService {
                         );
                     }
                 }
-                return true; // 플랜 B 성공 처리
+                return true; 
             } else {
                 throw new RuntimeException(e);
             }
@@ -314,22 +312,34 @@ public class SellerService {
         return result > 0;
     }
     
-    // 5. 상품 수정 폼을 위한 옵션 포맷팅
+    // 5. 상품 수정 폼을 위한 옵션 포맷팅 (💡 null 방어 코드 추가)
     public List<Map<String, String>> getOptionItemsForEdit(int productId) {
         List<Map<String, String>> optionItems = new ArrayList<>();
         List<OptionGroupDTO> groups = sellerMapper.getOptionGroups(productId);
         
+        if (groups == null || groups.isEmpty()) {
+            return optionItems;
+        }
+        
         for (OptionGroupDTO group : groups) {
-            if ("추가상품".equals(group.getGroupName())) continue;
+            if (group == null || "추가상품".equals(group.getGroupName())) continue;
+            
+            if (group.getOptionGroupId() == null) continue;
             
             List<OptionValueDTO> values = sellerMapper.getOptionValues(group.getOptionGroupId());
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < values.size(); i++) {
-                sb.append(values.get(i).getOptionName());
-                if (i < values.size() - 1) sb.append(",");
+            
+            if (values != null && !values.isEmpty()) {
+                for (int i = 0; i < values.size(); i++) {
+                    if (values.get(i) != null && values.get(i).getOptionName() != null) {
+                        sb.append(values.get(i).getOptionName());
+                        if (i < values.size() - 1) sb.append(",");
+                    }
+                }
             }
+            
             Map<String, String> item = new HashMap<>();
-            item.put("groupName", group.getGroupName());
+            item.put("groupName", group.getGroupName() != null ? group.getGroupName() : "");
             item.put("valuesStr", sb.toString());
             optionItems.add(item);
         }
@@ -339,7 +349,15 @@ public class SellerService {
     // 6. 판매자 대시보드 통계
     public Map<String, Integer> getDashboardStats(String brandName) {
         Map<String, Integer> stats = new HashMap<>();
-        int brandId = sellerMapper.getBrandId(brandName);
+        Integer brandId = sellerMapper.getBrandId(brandName);
+        
+        if (brandId == null) {
+            stats.put("totalCount", 0);
+            stats.put("soldOutCount", 0);
+            stats.put("onSaleCount", 0);
+            stats.put("stopCount", 0);
+            return stats;
+        }
         
         int totalCount = sellerMapper.getTotalProductCount(brandId);
         int soldOutCount = sellerMapper.getSoldOutProductCount(brandId);
@@ -374,8 +392,8 @@ public class SellerService {
     
     public List<ProductDTO> getProductListByBrandName(String brandName) {
         List<ProductDTO> list = new ArrayList<>();
-        int brandId = sellerMapper.getBrandId(brandName);
-        if (brandId != -1) {
+        Integer brandId = sellerMapper.getBrandId(brandName);
+        if (brandId != null) {
             list = sellerMapper.getProductListByBrandId(brandId);
         }
         return list;

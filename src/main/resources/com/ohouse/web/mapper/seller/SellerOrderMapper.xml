@@ -30,11 +30,12 @@
 
     <select id="selectDashboardOrderStats" resultType="java.util.Map">
         SELECT 
-            NVL(SUM(CASE WHEN delivery_status = 2 THEN 1 ELSE 0 END), 0) AS readyCount, 
-            NVL(SUM(CASE WHEN delivery_status = 3 THEN 1 ELSE 0 END), 0) AS shippingCount, 
-            NVL(SUM(CASE WHEN delivery_status = 4 THEN 1 ELSE 0 END), 0) AS deliveredCount, 
-            NVL(SUM(CASE WHEN delivery_status = 5 THEN 1 ELSE 0 END), 0) AS confirmedCount, 
-            NVL(SUM(CASE WHEN delivery_status IN (5, 12) THEN price * quantity ELSE 0 END), 0) AS totalSales 
+            NVL(SUM(CASE WHEN delivery_status = 2 THEN 1 ELSE 0 END), 0) AS "readyCount", 
+            NVL(SUM(CASE WHEN delivery_status = 3 THEN 1 ELSE 0 END), 0) AS "shippingCount", 
+            NVL(SUM(CASE WHEN delivery_status = 4 THEN 1 ELSE 0 END), 0) AS "deliveredCount", 
+            NVL(SUM(CASE WHEN delivery_status = 5 THEN 1 ELSE 0 END), 0) AS "confirmedCount", 
+            NVL(SUM(CASE WHEN delivery_status IN (5, 12) THEN price * quantity ELSE 0 END), 0) AS "totalSales",
+            NVL(SUM(CASE WHEN delivery_status IN (5, 12) THEN (price * quantity) * 0.98 ELSE 0 END), 0) AS "finalSettlement"
         FROM ORDERS_DETAIL 
         WHERE brand_id = (SELECT brand_id FROM brand WHERE brand_name = #{brandName})
     </select>

@@ -1,10 +1,10 @@
-package com.ohouse.web.mapper.seller;
+package com.ohouse.web.mapper.auth;
 
 import org.apache.ibatis.annotations.Param;
 
 import com.ohouse.web.domain.seller.BrandDTO;
 
-public interface BrandMapper {
+public interface BrandAuthMapper {
     
     int insert(BrandDTO brand);
 

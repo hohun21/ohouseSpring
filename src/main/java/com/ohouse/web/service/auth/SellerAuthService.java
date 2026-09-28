@@ -1,9 +1,10 @@
-package com.ohouse.web.service.seller;
+package com.ohouse.web.service.auth;
 
 import java.util.Map;
-import com.ohouse.web.domain.seller.SellerSignupRequest;
+
+import com.ohouse.web.mapper.auth.SellerAuthMapper;
+import com.ohouse.web.domain.auth.SellerSignupRequest;
 import com.ohouse.web.domain.seller.SellerDTO;
-import com.ohouse.web.mapper.seller.SellerAuthMapper;
 import com.ohouse.web.security.LegacyPasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +19,8 @@ public class SellerAuthService {
 
     @Transactional
     public void signup(SellerSignupRequest req, Map<String, Boolean> errors) {
-        if (mapper.countEmail(req.getEmail()) > 0) errors.put("duplicateEmail", true);
+       
+    	if (mapper.countEmail(req.getEmail()) > 0) errors.put("duplicateEmail", true);
         if (mapper.countBrand(req.getBrandName().trim()) > 0) errors.put("duplicateBrand", true);
         if (mapper.countBusiness(req.getBusinessNumber()) > 0) errors.put("duplicateBusiness", true);
         if (mapper.countMailOrder(req.getMailOrderNumber().trim()) > 0) errors.put("duplicateMailOrder", true);
@@ -36,6 +38,7 @@ public class SellerAuthService {
        
         if (mapper.insertSeller(seller) != 1 || mapper.insertBrand(seller.getSellerId(), req.getBrandName().trim()) != 1)
             throw new IllegalStateException("판매자 등록에 실패했습니다.");
+        
     }
 
     @Transactional

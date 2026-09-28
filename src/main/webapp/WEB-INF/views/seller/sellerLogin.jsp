@@ -344,7 +344,7 @@ $(function () {
         }
 
         $.ajax({
-            url: "${pageContext.request.contextPath}/sellerStatusCheck.ajax",
+            url: "${pageContext.request.contextPath}/seller/sellerStatusCheck.ajax",
             type: "GET",
             data: {
                 email: email

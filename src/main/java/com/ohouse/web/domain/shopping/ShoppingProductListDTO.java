@@ -4,7 +4,7 @@ import java.util.Date;
 import lombok.Data;
 
 @Data
-public class ListingProduct {
+public class ShoppingProductListDTO {
     private int rank;
     private int productId;
     private String brandName;

@@ -42,4 +42,9 @@ public interface ReviewService {
 
     // 11. 사용자의 리뷰 작성 가능 여부 및 기존 리뷰 작성 여부 체크
     boolean checkAndValidateUserReview(int memberId, long productId) throws ClassNotFoundException, SQLException;
+
+    int selectMyReviewTotalCount(int memberId) throws ClassNotFoundException, SQLException ;
+
+	List<ReviewDTO> selectMyReviewList(ReviewPageDTO reqDTO) throws ClassNotFoundException, SQLException ;
+
 }

@@ -4,9 +4,11 @@ import java.util.Collections;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.ohouse.web.domain.seller.SellerAuthDTO;
+
+import com.ohouse.web.domain.auth.SellerAuthDTO;
 import com.ohouse.web.service.auth.PasswordChangeService;
-import com.ohouse.web.service.seller.SellerAuthService;
+import com.ohouse.web.service.auth.SellerAuthService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;

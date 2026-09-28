@@ -1043,11 +1043,13 @@ async function payment() {
     );
 
     const DEV_MODE = true;
-
+    console.log("orderName =", orderName);
     if (DEV_MODE) {
         location.href =
-            "/order/payment/success.htm?orderName="
-            + encodeURIComponent(orderName);
+            "/order/payment/success.htm"
+            + "?orderName=" + encodeURIComponent(orderName)
+            + "&tossOrderId=" + encodeURIComponent(tossOrderId);
+
         return;
     }
 

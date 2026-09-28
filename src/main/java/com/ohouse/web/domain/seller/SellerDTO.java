@@ -1,6 +1,10 @@
 package com.ohouse.web.domain.seller;
 
 import java.util.Date;
+import java.util.List;
+
+import com.ohouse.web.domain.auth.AuthoritiesVO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
