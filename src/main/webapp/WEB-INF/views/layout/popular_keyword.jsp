@@ -196,6 +196,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('${pageContext.request.contextPath}/search/top10.ajax')
             .then(response => response.json())
             .then(data => {
+                // 💡 서버에서 응답받은 데이터가 문자열 형태일 경우를 대비한 방어 코드 추가
+                if (typeof data === 'string') {
+                    data = JSON.parse(data);
+                }
+
                 if (data && data.length > 0) {
                     keywordData = data;
                     updateRollingView(); 
