@@ -59,12 +59,20 @@ public class OrderController {
 
             int member_id = 4;
             List<Integer> cart_items_ids = (List<Integer>) session.getAttribute("selectedCartItemsIds");
-            orderService.insertOrder(member_id, orderRequestDTO, cart_items_ids);
-
+            int order_id = orderService.insertOrder(member_id, orderRequestDTO, cart_items_ids);
+            session.setAttribute("order_id",order_id);
             return "{\"success\":true}";
         } catch (Exception e) {
             String msg = e.getMessage() == null ? "" : e.getMessage().replace("\"", "\\\"");
             return "{\"success\":false,\"message\":\"" + msg + "\"}";
         }
     }
+    @GetMapping("/payment/success.htm")
+    public String paymentSuccess(  @RequestParam("orderName") String orderName,HttpSession session,Model model) {
+        int order_id = (Integer) session.getAttribute("order_id");
+        model.addAttribute("orderName", orderName);
+        model.addAttribute("order_id", order_id);
+        return "/payment/success";
+    }
+
 }

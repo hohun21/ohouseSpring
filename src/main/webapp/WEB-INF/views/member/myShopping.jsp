@@ -672,7 +672,7 @@
                 <div class="order-item">
                     <div class="order-header">
                         <div>
-                            <span>${order.order_date}</span>
+                            <span><fmt:formatDate value="${order.order_date}" pattern="yyyy-MM-dd"/></span>
                             <span class="order-name">${order.order_name}</span>
                         </div>
                         <button type="button" class="order-toggle">

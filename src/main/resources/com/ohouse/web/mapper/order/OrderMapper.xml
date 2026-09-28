@@ -78,4 +78,26 @@
         WHERE PRODUCT_OPTION_ID = #{productOptionId}
           AND STOCK >= #{quantity}
     </update>
+
+    <!-- viewMyOrder -->
+    <select id="viewMyOrder" resultType="com.ohouse.web.domain.member.MyOrderDTO">
+        SELECT ORDER_ID as orders_id,ORDER_NAME,PAYMENT_PRICE,ORDER_DATE
+        ,REQUEST_MSG FROM ORDERS
+        WHERE MEMBER_ID = #{member_id}
+    </select>
+
+    <!-- viewMyOrderDetail -->
+    <select id="viewMyOrderDetail" resultType="com.ohouse.web.domain.member.MyOrderDetailDTO">
+        SELECT p.PRODUCT_ID,
+        od.ORDERS_DETAIL_ID,
+        od.ORDER_ID,
+        od.PRODUCT_NAME,od.img_url as image_url ,
+        od.OPTION_NAME,od.PRICE,
+        od.QUANTITY,b.BRAND_ID,
+        b.BRAND_NAME,od.DELIVERY_STATUS,
+        od.DELIVERED_DATE,od.PURCHASE_CONFIRMED_DATE
+        FROM ORDERS_DETAIL od JOIN BRAND b ON od.brand_id = b.brand_id
+        JOIN PRODUCT p ON od.PRODUCT_NAME = p.PRODUCT_NAME
+        WHERE od.ORDER_ID = #{order_id}
+    </select>
 </mapper>

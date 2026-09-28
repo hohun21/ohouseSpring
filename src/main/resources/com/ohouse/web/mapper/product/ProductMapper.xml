@@ -87,4 +87,94 @@
         b.brand_name
         HAVING COUNT(DISTINCT pov.option_value_id) = #{option_value_count}
     </select>
+    <!-- viewProductByCategories -->
+    <select id="viewProductByCategories"
+            parameterType="map"
+            resultType="com.ohouse.web.domain.product.ProductDTO">
+        SELECT
+        p.product_id,
+        p.brand_id,
+        b.brand_name,
+        p.product_name,
+        p.original_price,
+        p.price,
+        p.category_id,
+        p.discount_rate,
+        pi.image_url AS image_url,
+
+        NVL(r.avg_rating, 0) AS avg_rating,
+        NVL(r.review_count, 0) AS review_count,
+        NVL(s.sales_quantity, 0) AS sales_quantity
+
+        FROM product p
+
+        JOIN brand b
+        ON p.brand_id = b.brand_id
+
+        LEFT JOIN (
+        SELECT
+        product_id,
+        ROUND(AVG(rating), 1) AS avg_rating,
+        COUNT(*) AS review_count
+        FROM review
+        GROUP BY product_id
+        ) r
+        ON p.product_id = r.product_id
+
+        LEFT JOIN (
+        SELECT
+        po.product_id,
+        SUM(od.quantity) AS sales_quantity
+        FROM orders_detail od
+        JOIN product_option po
+        ON po.product_option_id = od.product_option_id
+        GROUP BY po.product_id
+        ) s
+        ON p.product_id = s.product_id
+        <!-- 대표 이미지 1개 -->
+        LEFT JOIN (
+        SELECT
+        product_id,
+        image_url,
+        ROW_NUMBER() OVER (
+        PARTITION BY product_id
+        ORDER BY sort_order
+        ) AS rn
+        FROM product_image
+        ) pi
+        ON p.product_id = pi.product_id
+        AND pi.rn = 1
+        WHERE p.category_id IN
+        <foreach collection="categoryIds"
+                 item="categoryId"
+                 open="("
+                 separator=","
+                 close=")">
+            #{categoryId}
+        </foreach>
+        ORDER BY
+        <choose>
+            <when test="sort == 'latest'">
+                p.created DESC,
+                p.product_id
+            </when>
+            <when test="sort == 'lowprice'">
+                p.price ASC,
+                p.product_id
+            </when>
+            <when test="sort == 'recommend'">
+                avg_rating DESC,
+                p.product_id
+            </when>
+            <when test="sort == 'popular'">
+                NVL(s.sales_quantity, 0) DESC,
+                p.product_id
+            </when>
+            <otherwise>
+                avg_rating DESC,
+                p.product_id
+            </otherwise>
+        </choose>
+    </select>
+
 </mapper>

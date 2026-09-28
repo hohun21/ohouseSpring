@@ -19,7 +19,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertOrder(int member_id, OrderRequestDTO dto, List<Integer> cart_items_ids) throws Exception {
+    public int insertOrder(int member_id, OrderRequestDTO dto, List<Integer> cart_items_ids) throws Exception {
         Integer cartId = null;
 
 
@@ -94,5 +94,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // @Transactional이 COMMIT 처리
+        return order_id;
     }
 }
