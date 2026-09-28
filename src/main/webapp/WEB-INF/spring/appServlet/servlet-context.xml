@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
+
 	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -17,6 +18,7 @@
 		<mvc:message-converters register-defaults="true">
 			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
 		</mvc:message-converters>
+
 	</mvc:annotation-driven>
 	
 	<context:component-scan base-package="com.ohouse.web" use-default-filters="false">
@@ -37,5 +39,6 @@
 	<mvc:resources mapping="/resources/**" location="/resources/" />
 	
 	<mvc:resources mapping="/images/**" location="/images/" />
+
 
 </beans>

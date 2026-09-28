@@ -1,19 +1,18 @@
 package com.ohouse.web.controller.shopping.category;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import com.ohouse.web.domain.shopping.category.CategoryDTO;
+import com.ohouse.web.service.product.ProductService;
+import com.ohouse.web.service.shopping.category.CategoryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.ohouse.web.domain.shopping.category.CategoryDTO;
-import com.ohouse.web.service.shopping.category.CategoryService;
-
-import lombok.RequiredArgsConstructor;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -21,13 +20,14 @@ import lombok.RequiredArgsConstructor;
 public class CategoryController {
 
 	private final CategoryService categoryService;
+	private final ProductService productService;
 	
 	@GetMapping("/category.htm")
 	public String category(
 			@RequestParam(value = "category_id", required = false, defaultValue = "10000000") int categoryId,
 			@RequestParam(value = "sort", required = false, defaultValue = "recommend") String sort,
 			@RequestParam(value = "view", required = false, defaultValue = "all") String view,
-			Model model) {
+			Model model) throws SQLException {
 		
 		List<CategoryDTO> categories = categoryService.getAllCategories();
 		
@@ -75,7 +75,7 @@ public class CategoryController {
 		// List<ProductDTO> products = productService.getProductListByCategories(categoryIds, sort);
 		
 		// List<ProductDTO>, List<OnlyDTO> List<ProductDTO>
-		List<?> products = new ArrayList<>();
+		List<?> products = this.productService.getProductListByCategories(categoryIds, sort);
 		List<?> onlyProducts = new ArrayList<>();
 		List<?> bannerProducts = new ArrayList<>();
 		
