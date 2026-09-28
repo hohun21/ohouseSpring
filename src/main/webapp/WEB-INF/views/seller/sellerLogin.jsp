@@ -181,6 +181,8 @@ a {
         파트너 로그인
     </h1>
 
+    <c:if test="${not empty loginError}"><div class="login-error"><c:out value="${loginError}"/></div></c:if>
+    <c:if test="${passwordChanged}"><div>비밀번호가 변경되었습니다. 다시 로그인해주세요.</div></c:if>
     <!-- 이메일 또는 비밀번호 불일치 -->
     <c:if test="${errors.emailOrPwNotMatch}">
 
@@ -289,6 +291,7 @@ a {
 
         </button>
 
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     </form>
 
 
@@ -308,7 +311,7 @@ a {
 
     <!-- 일반 회원 로그인 -->
     <a class="member-login"
-       href="${pageContext.request.contextPath}/login.htm">
+       href="${pageContext.request.contextPath}/auth/login.htm">
 
         일반 회원 로그인으로 이동
 

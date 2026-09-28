@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -141,7 +142,7 @@
                                     <td>${member.memberId}</td>
                                     <td>${member.id}</td>
                                     <td>${member.name}</td>
-                                    <td>${member.role}</td>
+                                    <td>${member.authList[0].authority}</td>
                                     <td><fmt:formatDate value="${member.regDate}" pattern="yyyy-MM-dd"/></td>
                                     
                                     <td>

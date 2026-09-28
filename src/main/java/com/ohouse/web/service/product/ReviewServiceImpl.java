@@ -33,7 +33,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Service
 public class ReviewServiceImpl implements ReviewService {
     //r2 사용
-    // 👉 ProductAddProHandler에서 사용중인 공용 R2 설정값 그대로 연동
     private static final String R2_ENDPOINT = "https://c118a7efdddd35d3edac1db3a63ed76d.r2.cloudflarestorage.com";
     private static final String R2_ACCESS_KEY = "8f8a91958a3c06d4ce11ba80f5d60e2f";
     private static final String R2_SECRET_KEY = "5ab97a22e5baa3fe630165a9e770f0eada870d8672aaea80d3258ccbc2440667";
