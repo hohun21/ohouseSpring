@@ -33,7 +33,7 @@
 			delete-cookies="remember-me, JSESSION_ID" />
 
 		<security:remember-me
-			data-source-ref="dataSource" token-validity-seconds="604800" />
+			user-service-ref="customUserDetailsService" token-validity-seconds="604800" />
 
 		<security:csrf request-matcher-ref="authCsrfMatcher" />
 	</security:http>

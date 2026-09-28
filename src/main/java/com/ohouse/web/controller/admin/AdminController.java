@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ohouse.web.domain.admin.CouponDTO;
-import com.ohouse.web.domain.member.MemberDTO;
+import com.ohouse.web.domain.member.MemberVO;
 import com.ohouse.web.domain.seller.ProductDTO;
 import com.ohouse.web.domain.seller.SellerDTO;
 import com.ohouse.web.domain.seller.SellerOrderDTO;
@@ -58,7 +58,7 @@ public class AdminController {
         int endRow = currentPage * pageSize;
         
         int totalCount = adminService.getTotalMemberCount();
-        List<MemberDTO> memberList = adminService.getMemberListWithPaging(startRow, endRow);
+        List<MemberVO> memberList = adminService.getMemberListWithPaging(startRow, endRow);
         
         int totalPage = (int) Math.ceil((double) totalCount / pageSize);
         int startPage = ((currentPage - 1) / pageBlock) * pageBlock + 1;

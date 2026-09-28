@@ -1,11 +1,11 @@
 package com.ohouse.web.mapper.seller;
 
 import org.apache.ibatis.annotations.Param;
-import com.ohouse.web.domain.seller.SellerVO;
+import com.ohouse.web.domain.seller.SellerDTO;
 
 public interface SellerAuthMapper {
    
-	SellerVO findByEmail(@Param("email") String email);
+	SellerDTO findByEmail(@Param("email") String email);
     
 	int countEmail(@Param("email") String email);
 
@@ -15,7 +15,7 @@ public interface SellerAuthMapper {
     
 	int countMailOrder(@Param("mailOrderNumber") String mailOrderNumber);
     
-	int insertSeller(SellerVO seller);
+	int insertSeller(SellerDTO seller);
 
 	int insertBrand(@Param("sellerId") int sellerId, @Param("brandName") String brandName);
     

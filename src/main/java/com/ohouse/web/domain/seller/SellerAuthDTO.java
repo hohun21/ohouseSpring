@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SellerAuthDTO {
-    private long sellerId;
+    private int sellerId;
     private String email;
     private String businessNumber;
     private String brandName;

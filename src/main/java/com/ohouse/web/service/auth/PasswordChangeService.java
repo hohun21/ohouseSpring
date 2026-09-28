@@ -21,6 +21,5 @@ public class PasswordChangeService {
     public void change(String id, String current, String next) {
         if (!check(id, current)) throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
         if (mapper.updatePassword(id, encoder.encode(next)) != 1) throw new IllegalStateException("비밀번호 변경에 실패했습니다.");
-        mapper.deletePersistentTokens(id);
     }
 }

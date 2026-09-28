@@ -66,8 +66,5 @@
 	<update id="upgradeLegacyPassword">
 		UPDATE member SET password = #{password} WHERE id = #{id} AND password = #{oldPassword}
 	</update>
-	<delete id="deletePersistentTokens">
-		DELETE FROM persistent_logins WHERE username = #{id}
-	</delete>
 
 </mapper>

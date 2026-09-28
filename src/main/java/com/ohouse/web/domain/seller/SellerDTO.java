@@ -23,4 +23,6 @@ public class SellerDTO {
     private String customerServicePhone;    
     private String status;
     private Date regDate;
+    
+    private String brandName;
 }

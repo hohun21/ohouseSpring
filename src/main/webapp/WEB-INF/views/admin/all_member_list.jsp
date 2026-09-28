@@ -142,7 +142,7 @@
                                     <td>${member.memberId}</td>
                                     <td>${member.id}</td>
                                     <td>${member.name}</td>
-                                    <td>${member.role}</td>
+                                    <td>${member.authList[0].authority}</td>
                                     <td><fmt:formatDate value="${member.regDate}" pattern="yyyy-MM-dd"/></td>
                                     
                                     <td>
