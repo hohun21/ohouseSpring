@@ -1,4 +1,4 @@
-package com.ohouse.web.domain.seller;
+package com.ohouse.web.domain.auth;
 
 import java.io.Serializable;
 

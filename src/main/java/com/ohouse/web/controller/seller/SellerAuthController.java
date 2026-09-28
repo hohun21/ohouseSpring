@@ -2,13 +2,10 @@ package com.ohouse.web.controller.seller;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import com.ohouse.web.domain.seller.SellerAuthDTO;
-import com.ohouse.web.domain.seller.SellerSignupRequest;
-import com.ohouse.web.domain.seller.SellerDTO;
-import com.ohouse.web.service.seller.SellerAuthService;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,10 +17,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.ohouse.web.domain.auth.SellerAuthDTO;
+import com.ohouse.web.domain.auth.SellerSignupRequest;
+import com.ohouse.web.domain.seller.SellerDTO;
+import com.ohouse.web.service.auth.SellerAuthService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
@@ -67,9 +70,8 @@ public class SellerAuthController {
         }
 
         try {
-
-        SellerDTO seller = service.authenticate(email.trim(), password, normalized);
-            // Create a fresh session after all three credentials have been checked.
+            SellerDTO seller = service.authenticate(email.trim(), password, normalized);
+            
             HttpSession old = request.getSession(false);
             if (old != null) old.invalidate();
 
@@ -85,8 +87,7 @@ public class SellerAuthController {
             return "redirect:/main.htm";
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-
-        model.addAttribute("loginError", e.getMessage());
+            model.addAttribute("loginError", e.getMessage());
             return "seller/sellerLogin";
         }
     }
@@ -106,11 +107,14 @@ public class SellerAuthController {
             if (email.trim().isEmpty() || !normalized.matches("[0-9]{10}") || password.isEmpty())
                 throw new IllegalArgumentException("입력값을 다시 확인해 주세요.");
 
-            result.put("success", true); result.put("status", service.signupStatus(email.trim(), password, normalized));
+            result.put("success", true); 
+            result.put("status", service.signupStatus(email.trim(), password, normalized));
             result.put("message", "입점 상태 조회가 완료되었습니다.");
 
         } catch (IllegalArgumentException e) {
-        	result.put("success", false); result.put("status", null); result.put("message", e.getMessage());
+            result.put("success", false); 
+            result.put("status", null); 
+            result.put("message", e.getMessage());
         }
         return result;
     }
@@ -122,12 +126,15 @@ public class SellerAuthController {
         Map<String, Object> result = new HashMap<>();
 
         if (email == null || email.trim().isEmpty()) {
-            result.put("success", false); result.put("code", "INVALID_EMAIL"); return result;
+            result.put("success", false); 
+            result.put("code", "INVALID_EMAIL"); 
+            return result;
         }
 
         String status = service.status(email.trim());
 
-        result.put("success", true); result.put("status", status);
+        result.put("success", true); 
+        result.put("status", status);
         result.put("code", status == null ? "NOT_FOUND" : status);
         return result;
     }
@@ -144,7 +151,8 @@ public class SellerAuthController {
         Map<String, Object> response = new HashMap<>();
 
         if (value == null || value.trim().isEmpty()) {
-            response.put("count", 0); response.put("code", "INVALID_VALUE");
+            response.put("count", 0); 
+            response.put("code", "INVALID_VALUE");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 

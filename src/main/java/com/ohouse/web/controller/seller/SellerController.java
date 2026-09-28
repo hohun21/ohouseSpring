@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.ohouse.web.domain.auth.SellerAuthDTO;
 import com.ohouse.web.domain.seller.ProductDTO;
 import com.ohouse.web.domain.seller.ProductFormDTO;
 import com.ohouse.web.domain.seller.ProductOptionDTO;
-import com.ohouse.web.domain.seller.SellerAuthDTO;
 import com.ohouse.web.domain.seller.SellerOrderDTO;
 import com.ohouse.web.domain.shopping.category.CategoryDTO;
 import com.ohouse.web.service.seller.SellerOrderService;

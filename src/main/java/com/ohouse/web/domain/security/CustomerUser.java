@@ -32,7 +32,7 @@ public class CustomerUser extends User {
 	
 	public CustomerUser(MemberVO memberVO) {
 	    super(
-	        memberVO.getId(),
+	    	memberVO.getId(),
 	        memberVO.getPassword(),
 	        memberVO.getStatus() == 1, // enabled
 	        true,                      // accountNonExpired
