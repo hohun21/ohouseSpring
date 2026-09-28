@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 1. 서버에서 Top 10 인기 검색어 데이터 비동기 호출
     function fetchTopKeywords() {
-        fetch('${pageContext.request.contextPath}/search/topKeywords.ajax')
+        fetch('${pageContext.request.contextPath}/search/top10.ajax')
             .then(response => response.json())
             .then(data => {
                 if (data && data.length > 0) {

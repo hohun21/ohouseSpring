@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.seller.SellerOrderMapper">
+
+    <select id="selectOrderListByBrand" resultType="com.ohouse.web.domain.seller.SellerOrderDTO">
+        SELECT od.orders_detail_id AS orderDetailId, 
+               o.order_date AS orderDate, 
+               od.product_name AS productName, 
+               od.option_name AS optionName, 
+               od.quantity, od.price, 
+               od.delivery_status AS deliveryStatus 
+        FROM ORDERS_DETAIL od 
+        JOIN ORDERS o ON od.order_id = o.order_id 
+        WHERE od.brand_id = (SELECT brand_id FROM brand WHERE brand_name = #{brandName}) 
+          AND od.delivery_status IN (1, 2, 3, 4, 5) 
+        ORDER BY o.order_date DESC
+    </select>
+
+    <update id="updateDeliveryStatus">
+        UPDATE ORDERS_DETAIL 
+        SET delivery_status = #{status} 
+            <if test="status == 4">
+                , delivered_date = SYSDATE 
+            </if>
+        WHERE orders_detail_id = #{orderDetailId}
+    </update>
+
+    <select id="selectDashboardOrderStats" resultType="java.util.Map">
+        SELECT 
+            NVL(SUM(CASE WHEN delivery_status = 2 THEN 1 ELSE 0 END), 0) AS readyCount, 
+            NVL(SUM(CASE WHEN delivery_status = 3 THEN 1 ELSE 0 END), 0) AS shippingCount, 
+            NVL(SUM(CASE WHEN delivery_status = 4 THEN 1 ELSE 0 END), 0) AS deliveredCount, 
+            NVL(SUM(CASE WHEN delivery_status = 5 THEN 1 ELSE 0 END), 0) AS confirmedCount, 
+            NVL(SUM(CASE WHEN delivery_status IN (5, 12) THEN price * quantity ELSE 0 END), 0) AS totalSales 
+        FROM ORDERS_DETAIL 
+        WHERE brand_id = (SELECT brand_id FROM brand WHERE brand_name = #{brandName})
+    </select>
+
+    <select id="selectClaimListByBrand" resultType="com.ohouse.web.domain.seller.SellerOrderDTO">
+        SELECT od.orders_detail_id AS orderDetailId, 
+               o.order_date AS orderDate, 
+               od.product_name AS productName, 
+               od.option_name AS optionName, 
+               od.quantity, od.price, 
+               od.delivery_status AS deliveryStatus 
+        FROM ORDERS_DETAIL od 
+        JOIN ORDERS o ON od.order_id = o.order_id 
+        WHERE od.brand_id = (SELECT brand_id FROM brand WHERE brand_name = #{brandName}) 
+          AND od.delivery_status IN (6, 7, 8, 9, 10, 11) 
+        ORDER BY o.order_date DESC
+    </select>
+
+    <select id="selectSettlementListByBrand" resultType="com.ohouse.web.domain.seller.SellerOrderDTO">
+        SELECT od.orders_detail_id AS orderDetailId, 
+               o.order_date AS orderDate, 
+               od.product_name AS productName, 
+               od.option_name AS optionName, 
+               od.quantity, od.price, 
+               od.delivery_status AS deliveryStatus, 
+               (od.price * od.quantity) AS totalPrice, 
+               ((od.price * od.quantity) * 0.98) AS settlementAmount 
+        FROM ORDERS_DETAIL od 
+        JOIN ORDERS o ON od.order_id = o.order_id 
+        WHERE od.brand_id = (SELECT brand_id FROM brand WHERE brand_name = #{brandName}) 
+          AND od.delivery_status = 12 
+        ORDER BY o.order_date DESC
+    </select>
+
+</mapper>
