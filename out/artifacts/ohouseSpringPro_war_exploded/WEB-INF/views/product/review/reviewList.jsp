@@ -582,15 +582,15 @@
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(function (response) {
-                if (response.status === 401) {
-                    // 비로그인 상태일 때 401 응답을 받으면 상세 페이지 주소를 통째로 들고 로그인으로 이동
+                /* if (response.status === 401) {
+                    비로그인 상태일 때 401 응답을 받으면 상세 페이지 주소를 통째로 들고 로그인으로 이동
                     if (confirm("로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?")) {
                         const currentDetailUrl = window.location.pathname + window.location.search;
                         window.location.href = '${pageContext.request.contextPath}/login.htm?referer=' + encodeURIComponent(currentDetailUrl);
                     }
                     return null;
                 }
-                
+                 */
                 if (!response.ok) throw new Error('HTTP 에러: ' + response.status);
                 return response.json();
             })
@@ -804,7 +804,7 @@
 
  // 리뷰 AJAX Fetch 수정
     function triggerReviewFetch(page, sort) {
-        var productId = '3377041';//`${product_id}`; 임시!
+        var productId = `${product_id}`;
         var reqUrl = '${pageContext.request.contextPath}/review.htm?product_id=' +  productId + '&sort=' + sort + '&page=' + page;
 
         selectedRatingsSet.forEach(function(val) {
@@ -959,7 +959,8 @@ function sendAdminReplyRequest(reviewId, adminReply) {
 <script>
 //리뷰 작성 모달 열기
 function openReviewModal() {
-    const isLoggedIn = '${sessionScope.authUser}' !== '';
+	var isLoggedIn = ${not empty sessionScope.authUser ? 'true' : 'false'};
+
     if (!isLoggedIn) {
         if (confirm("로그인 후 이용할 수 있습니다. 로그인하시겠습니까?")) {
             // 현재 상세 페이지의 경로와 상품 번호 파라미터를 통째로 encode해서 전달

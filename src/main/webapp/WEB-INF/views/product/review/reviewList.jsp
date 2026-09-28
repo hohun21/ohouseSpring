@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!-- CSS 불러오기 -->
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/resources/css/reviewList.css">
@@ -211,6 +211,7 @@
 		<button type="button" onclick="openReviewModal()">리뷰 남기기</button>
 	</div>
 
+
 	<!-- 별점 요약 카드 -->
 	<div class="review-summary-card">
 		<div class="summary-score-box">
@@ -297,7 +298,6 @@
 
 			<!-- 2. 2단 계층 옵션 드롭다운 -->
 			<!-- 2. 옵션 드롭다운 (단일/복합 구조 유연 대응) -->
-			<!-- 2. 옵션 드롭다운 영역 (여기를 통째로 교체하세요) -->
 			<div class="custom-dropdown" data-dropdown-id="option">
 				<button type="button" class="dropdown-btn js-dropdown-toggle">
 					옵션 <span>∨</span>
@@ -418,7 +418,48 @@
 		<jsp:include page="/WEB-INF/views/product/review/reviewItem.jsp" />
 	</div>
 </div>
+<script>
+//헤더에 토큰 지정. fetch엔 csrf가 없다네요 ...
+(function() {
+    // 1. 메타 태그에서 CSRF 토큰 읽기
+    const token = document.querySelector("meta[name='_csrf']")?.content;
+    const header = document.querySelector("meta[name='_csrf_header']")?.content;
 
+    if (!token || !header) return;
+
+    // 2. 원래의 fetch 함수를 변수에 백업
+    const originalFetch = window.fetch;
+
+    // 3. fetch 함수를 가로채서 커스텀 로직 추가
+    window.fetch = function(url, options = {}) {
+        // options가 없으면 빈 객체 생성
+        options.headers = options.headers || {};
+
+        // 메서드 확인 (소문자/대문자 모두 대응)
+        const method = (options.method || 'GET').toUpperCase();
+
+        // POST, PUT, DELETE, PATCH 등 데이터를 변경하는 요청일 때만 CSRF 토큰 자동 주입
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+            // Headers 객체인 경우와 일반 객체인 경우 모두 지원
+            if (options.headers instanceof Headers) {
+                if (!options.headers.has(header)) {
+                    options.headers.append(header, token);
+                }
+            } else if (Array.isArray(options.headers)) {
+                // 배열 형태인 경우
+                options.headers.push([header, token]);
+            } else {
+                // 일반 자바스크립트 객체 ({ 'Content-Type': '...' } 등) 인 경우
+                options.headers[header] = token;
+            }
+        }
+
+        // 4. 원래의 fetch 실행
+        return originalFetch.call(this, url, options);
+    };
+})();
+
+</script>
 <script>
 (function() {
     var parentContainer = document.getElementById('detail-review') || document.getElementById('reviewContainer') || document.body;
@@ -571,10 +612,20 @@
             e.stopPropagation();
             e.preventDefault();
 
+            const isLoggedIn = ${not empty sessionScope.authUser ? true : false};
+
+            if (!isLoggedIn) {
+                if (confirm("로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?")) {
+                    const currentDetailUrl = window.location.pathname + window.location.search;
+                    window.location.href = '${pageContext.request.contextPath}/login.htm?referer=' + encodeURIComponent(currentDetailUrl);
+                }
+                return; // 비로그인이면 서버 요청을 아예 안 보냄
+            }
+            
             var reviewId = likeBtn.getAttribute('data-review-id');
             if (!reviewId) return;
             var contextPath = "${pageContext.request.contextPath}";
-            // 💡 memberId 파라미터 제거 (서버 세션에서 처리하므로 review_id만 보내면 됨)
+            // memberId 파라미터 제거 (서버 세션에서 처리하므로 review_id만 보내면 됨)
             var url = contextPath +'/review/helpCountToggle.htm?review_id=' + reviewId;
 
             fetch(url, {
@@ -959,7 +1010,7 @@ function sendAdminReplyRequest(reviewId, adminReply) {
 <script>
 //리뷰 작성 모달 열기
 function openReviewModal() {
-    const isLoggedIn = true;//'${sessionScope.authUser}' !== '';
+	const isLoggedIn = ${not empty sessionScope.authUser ? true : false};
     if (!isLoggedIn) {
         if (confirm("로그인 후 이용할 수 있습니다. 로그인하시겠습니까?")) {
             // 현재 상세 페이지의 경로와 상품 번호 파라미터를 통째로 encode해서 전달
@@ -971,13 +1022,6 @@ function openReviewModal() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product_id') || '${product_id}';
-
-    //임시!!!!
-    /* var modal = document.getElementById('review-write-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-    } */
-    //임시!!!!
     
     fetch('${pageContext.request.contextPath}/review/checkReview.htm?product_id=' + productId)
         .then(response => {

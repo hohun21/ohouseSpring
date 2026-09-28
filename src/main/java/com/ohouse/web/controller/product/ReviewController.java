@@ -1,6 +1,7 @@
 package com.ohouse.web.controller.product;
 
 import java.io.PrintWriter;
+import java.security.Principal;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -25,12 +26,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.gson.Gson;
 import com.ohouse.member.dto.AuthUserDTO;
+import com.ohouse.web.domain.auth.AuthUser;
+import com.ohouse.web.domain.member.MemberVO;
 import com.ohouse.web.domain.product.review.OptionFilterDTO;
 import com.ohouse.web.domain.product.review.PageDTO;
 import com.ohouse.web.domain.product.review.ReviewDTO;
 import com.ohouse.web.domain.product.review.ReviewPageDTO;
 import com.ohouse.web.domain.product.review.ReviewSummaryDTO;
+import com.ohouse.web.domain.security.CustomerUser;
 import com.ohouse.web.service.product.ReviewService;
 
 import lombok.RequiredArgsConstructor;
@@ -41,6 +46,11 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Controller
 @Log4j
@@ -59,33 +69,26 @@ public class ReviewController {
 			@RequestParam(value = "sort", defaultValue = "best") String sort,
 			@RequestParam(value = "ratings", required = false) List<Integer> ratings,
 			@RequestParam(value = "options", required = false) List<Integer> options,
+			Authentication authentication,
 			HttpSession session, Model model, HttpServletRequest request) throws ClassNotFoundException, SQLException {
 
-		if (productId == 1) {
-			productId = 3377041;
-		}
-
 		// 사용자 인증 정보 세팅
-		AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
 		int memberId = 0;
-		String role = "";
-		//------------임시--------------
-
-		authUser = (AuthUserDTO) session.getAttribute("authUser");
-		if (authUser == null) {
-			authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-			session.setAttribute("authUser", authUser);
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
 		}
-		memberId = authUser.getMemberId();
-
-		//-----------------------------
-
-		if(authUser != null) {
-			memberId = authUser.getMemberId();
-			role = authUser.getRole();
-		}
-		boolean isAdmin = "ADMIN".equals(role);
-
+	    
 		int numberPerPage = 5;
 		log.info("productId: " + productId + ", ratings: " + ratings + ", options: " + options);
 
@@ -132,78 +135,85 @@ public class ReviewController {
 		return "product/review/reviewList";
 	}
 	// ==========================================
-    // 2. 리뷰 작성 (WriteReviewHandler 대체)
-    // ==========================================
-    @PostMapping("/review/writeReview.htm")
-    public String writeReview(
-            @RequestParam("productId") int productId,
-            @RequestParam("rating") int rating,
-            @RequestParam("content") String content,
-            @RequestParam(value = "productOptionId", required = false) Integer productOptionId,
-            @RequestParam(value = "isPurchased", defaultValue = "0") int isPurchased,
-            @RequestParam(value = "reviewImage", required = false) MultipartFile reviewImage,
-            HttpSession session) throws Exception {
+	// 2. 리뷰 작성 (WriteReviewHandler 대체)
+	// ==========================================
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/review/writeReview.htm")
+	public String writeReview(
+			@RequestParam("productId") int productId,
+			@RequestParam("rating") int rating,
+			@RequestParam("content") String content,
+			@RequestParam(value = "productOptionId", required = false) Integer productOptionId,
+			@RequestParam(value = "isPurchased", defaultValue = "0") int isPurchased,
+			@RequestParam(value = "reviewImage", required = false) MultipartFile reviewImage,
+			Authentication authentication,
+			HttpSession session) throws Exception {
 
-        AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-        
-        //------------임시--------------
-        if (authUser == null) {
-            authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-            session.setAttribute("authUser", authUser);
-        }
-        //-----------------------------
 
-        int memberId = authUser.getMemberId();
+		// 사용자 인증 정보 세팅
+		int memberId = 0;
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
+		}
+		ReviewDTO reviewDTO = new ReviewDTO();
+		reviewDTO.setProductId(productId);
+		reviewDTO.setMemberId(memberId);
+		reviewDTO.setRating(rating);
+		reviewDTO.setContent(content);
+		reviewDTO.setProductOptionId(productOptionId != null ? productOptionId : 0);
+		reviewDTO.setIsPurchased(isPurchased); // DTO 타입에 맞춰 조정 (isPurchased 여부)
 
-        ReviewDTO reviewDTO = new ReviewDTO();
-        reviewDTO.setProductId(productId);
-        reviewDTO.setMemberId(memberId);
-        reviewDTO.setRating(rating);
-        reviewDTO.setContent(content);
-        reviewDTO.setProductOptionId(productOptionId != null ? productOptionId : 0);
-        reviewDTO.setIsPurchased(isPurchased); // DTO 타입에 맞춰 조정 (isPurchased 여부)
+		// 서비스 호출 (리뷰 등록 + 이미지 업로드 처리)
+		boolean success = reviewService.registerReview(reviewDTO, reviewImage);
 
-        // 서비스 호출 (리뷰 등록 + 이미지 업로드 처리)
-        boolean success = reviewService.registerReview(reviewDTO, reviewImage);
+		if (!success) {
+			log.error("❌ 리뷰 등록 실패!");
+		}
 
-        if (!success) {
-            log.error("❌ 리뷰 등록 실패!");
-        }
-
-        return "redirect:/product/productDetail.htm?product_id=" + productId;
-    }
-// ==========================================
+		return "redirect:/product/productDetail.htm?product_id=" + productId;
+	}
+	// ==========================================
 	// 3. 리뷰 좋아요 / 도움돼요 토글 (핸들러 방식 이식)
 	// ==========================================
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping(value = "/review/helpCountToggle.htm")
 	@ResponseBody
 	public void toggleHelpCount(
 			@RequestParam("review_id") int reviewId,
 			HttpSession session,
+			Authentication authentication,
 			HttpServletResponse response) throws Exception {
 
-		log.info("🐇🐇 toggleHelpCount 진입 성공! reviewId = " + reviewId);
-
-		AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-
-		//------------임시--------------
-
-		authUser = (AuthUserDTO) session.getAttribute("authUser");
-		if (authUser == null) {
-			authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-			session.setAttribute("authUser", authUser);
+		// 사용자 인증 정보 세팅
+		int memberId = 0;
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
+		} else {
+			 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "review_id가 누락되었습니다.");
+			
 		}
-
-		//-----------------------------
-		else if (authUser == null) {
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "LOGIN_REQUIRED");
-			return;
-		}
-
-
-
-		int memberId = authUser.getMemberId();
-
 		// 서비스 실행
 		Map<String, Object> resultMap = reviewService.toggleHelpCount(reviewId, memberId);
 
@@ -223,26 +233,33 @@ public class ReviewController {
 	// ==========================================
 	// 4. 리뷰 이미지 숨김 토글 (HideImageToggleHandler 이식)
 	// ==========================================
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping(value = "/review/hideImageToggle.htm")
 	@ResponseBody
 	public void toggleHideImage(
 			HttpServletRequest request,
 			HttpServletResponse response,
+			Authentication authentication,
 			HttpSession session) throws Exception {
 
-		log.info("🐇🐇 toggleHideImage 진입 성공!");
-
-		AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-
-		// ------------- 임시 테스트용 (필요시 주석 해제 또는 유지) -------------
-		if (authUser == null) {
-			authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-			session.setAttribute("authUser", authUser);
+		// 사용자 인증 정보 세팅
+		int memberId = 0;
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
 		}
-		// ------------------------------------------------------------------
-
 		// 권한 체크 (관리자만 가능)
-		if (authUser == null || !"ADMIN".equals(authUser.getRole())) {
+		if (!isAdmin) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.setContentType("application/json; charset=UTF-8");
 			try (PrintWriter out = response.getWriter()) {
@@ -263,7 +280,7 @@ public class ReviewController {
 			}
 
 			// 
-			com.google.gson.Gson gson = new com.google.gson.Gson();
+			Gson gson = new Gson();
 			Map<String, Object> data = gson.fromJson(buffer.toString(), Map.class);
 
 			int reviewId = ((Number) data.get("reviewId")).intValue();
@@ -293,23 +310,31 @@ public class ReviewController {
 	// ==========================================
 	// 5. 리뷰 삭제 (DeleteReviewHandler 대체)
 	// ==========================================
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/review/deleteReview.htm")
 	public String deleteReview(
 			@RequestParam("reviewId") int reviewId,
+			Authentication authentication,
 			HttpSession session, HttpServletRequest request) throws Exception {
 
-		AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-		//------------임시--------------
-
-		authUser = (AuthUserDTO) session.getAttribute("authUser");
-		if (authUser == null) {
-			authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-			session.setAttribute("authUser", authUser);
+		// 사용자 인증 정보 세팅
+		int memberId = 0;
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
 		}
-		int memberId = authUser.getMemberId();
 
-		//-----------------------------
-		if (authUser == null || !"ADMIN".equals(authUser.getRole())) {
+		if (!isAdmin) {
 			return "redirect:/login.htm";
 		}
 
@@ -318,101 +343,128 @@ public class ReviewController {
 		String referer = request.getHeader("referer");
 		return "redirect:" + (referer != null ? referer : "/index.htm");
 	}
+	
 	// 2. 리뷰 작성 (EditReviewHandler 대체)
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/review/editReview.htm")
 	public String editReview(
-	        @RequestParam("reviewId") int reviewId,
-	        @RequestParam("productId") int productId,
-	        @RequestParam("rating") int rating,
-	        @RequestParam("content") String content,
-	        @RequestParam(value = "reviewImage", required = false) MultipartFile reviewImage,
-	        HttpSession session, HttpServletRequest request) throws Exception {
+			@RequestParam("reviewId") int reviewId,
+			@RequestParam("productId") int productId,
+			@RequestParam("rating") int rating,
+			@RequestParam("content") String content,
+			@RequestParam(value = "reviewImage", required = false) MultipartFile reviewImage,
+			Authentication authentication,
+			HttpSession session, HttpServletRequest request) throws Exception {
 
-	    AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-	    if (authUser == null) {
-	        authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-	        session.setAttribute("authUser", authUser);
-	    }
+		// 사용자 인증 정보 세팅
+		int memberId = 0;
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
+		}
+		// DTO 세팅
+		ReviewDTO reviewDTO = new ReviewDTO();
+		reviewDTO.setReviewId(reviewId);
+		reviewDTO.setMemberId(memberId);
+		reviewDTO.setRating(rating);
+		reviewDTO.setContent(content);
 
-	    // DTO 세팅
-	    ReviewDTO reviewDTO = new ReviewDTO();
-	    reviewDTO.setReviewId(reviewId);
-	    reviewDTO.setMemberId(authUser.getMemberId());
-	    reviewDTO.setRating(rating);
-	    reviewDTO.setContent(content);
+		// R2 로직은 서비스impl에서...
+		boolean success = reviewService.modifyReview(reviewDTO, reviewImage);
 
-	    // 💡 복잡한 R2 로직은 다 빼고, DTO와 MultipartFile만 서비스로 던집니다!
-	    boolean success = reviewService.modifyReview(reviewDTO, reviewImage);
-
-	    if (success) {
-	        return "redirect:/product/productDetail.htm?product_id=" + productId;
-	    } else {
-	        request.setAttribute("errorMessage", "리뷰 수정에 실패했습니다.");
-	        return "common/error";
-	    }
+		if (success) {
+			return "redirect:/product/productDetail.htm?product_id=" + productId;
+		} else {
+			request.setAttribute("errorMessage", "리뷰 수정에 실패했습니다.");
+			return "common/error";
+		}
 	}
-	
+
 	// ==========================================
 	// 8. 리뷰 작성 가능 여부 체크 (ReviewCheckHandler 대체)
 	// ==========================================
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/review/checkReview.htm")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> checkReviewable(
 			@RequestParam(value = "product_id", defaultValue = "0") long productId,
+			Authentication authentication,
 			HttpSession session) throws ClassNotFoundException, SQLException {
 
-		AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-		//------------임시--------------
-
-		authUser = (AuthUserDTO) session.getAttribute("authUser");
-		if (authUser == null) {
-			authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-			session.setAttribute("authUser", authUser);
+		// 사용자 인증 정보 세팅
+		int memberId = 0;
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
 		}
-		int memberId = authUser.getMemberId();
 
-		//-----------------------------
-		if (authUser == null) {
-			return ResponseEntity.status(401).build();
-		}
-
-		boolean hasReviewed = reviewService.checkAndValidateUserReview(authUser.getMemberId(), productId);
+		boolean hasReviewed = reviewService.checkAndValidateUserReview(memberId, productId);
 
 		// 💡 Map.of() 대신 HashMap 사용으로 JSON 변환 안정성 확보
-	    Map<String, Object> responseMap = new HashMap<>();
-	    responseMap.put("hasReviewed", hasReviewed);
+		Map<String, Object> responseMap = new HashMap<>();
+		responseMap.put("hasReviewed", hasReviewed);
 
-	    // produces 설정으로 브라우저에게 확실하게 JSON을 보낸다고 알려줌
-	    return ResponseEntity.ok()
-	            .contentType(MediaType.APPLICATION_JSON)
-	            .body(responseMap);
+		// produces 설정으로 브라우저에게 확실하게 JSON을 보낸다고 알려줌
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(responseMap);
 	}
 
 	// ==========================================
 	// 5. 관리자 답글 등록/수정 (AdminReplyHandler 이식)
 	// ==========================================
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping(value = "/review/adminReply.htm")
 	@ResponseBody
 	public void saveAdminReply(
 			HttpServletRequest request,
 			HttpServletResponse response,
+			Authentication authentication,
 			HttpSession session) throws Exception {
 
 		log.info("🐇🐇 saveAdminReply 진입 성공!");
 
-		AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-
-		// ------------- 임시 테스트용 -------------
-		if (authUser == null) {
-			authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-			session.setAttribute("authUser", authUser);
+		// 사용자 인증 정보 세팅
+		int memberId = 0;
+		boolean isAdmin = false;
+		log.info("-------------authentication: " +authentication + "-------------------");
+		
+		// 
+		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
+		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
+		    memberId = customerUser.getMember_vo().getMemberId();
+		    
+		    isAdmin = authentication.getAuthorities().stream()
+		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+		                
+		    log.info("----------Memberid :" + memberId);
+		    log.info("----------isAdmin :" + isAdmin);
 		}
-		// -----------------------------------------
 
 		response.setContentType("application/json; charset=UTF-8");
 
 		try {
-			if (authUser == null || !"ADMIN".equals(authUser.getRole())) {
+			if (!isAdmin) {
 				try (PrintWriter out = response.getWriter()) {
 					out.print("{\"success\": false, \"message\": \"권한이 없습니다.\"}");
 					out.flush();
@@ -433,7 +485,7 @@ public class ReviewController {
 			}
 
 			int reviewId = Integer.parseInt(reviewIdStr);
-			boolean isAdmin = "ADMIN".equals(authUser.getRole());
+			
 
 			// 서비스 호출
 			boolean success = reviewService.saveAdminReply(reviewId, adminReply, isAdmin);
