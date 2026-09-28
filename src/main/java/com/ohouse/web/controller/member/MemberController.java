@@ -3,6 +3,7 @@ package com.ohouse.web.controller.member;
 import com.ohouse.web.domain.member.MyOrderDTO;
 import com.ohouse.web.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +31,9 @@ public class MemberController {
     }
 
     @GetMapping("/myShopping.htm")
-    public String myShopping(Model model) throws SQLException, ClassNotFoundException {
-        int member_id = 4;
+    public String myShopping(Model model,
+                             @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) throws SQLException, ClassNotFoundException {
+
         List<MyOrderDTO> orderdto = this.memberService.selectorder(member_id);
 
         model.addAttribute("orderdto",orderdto);

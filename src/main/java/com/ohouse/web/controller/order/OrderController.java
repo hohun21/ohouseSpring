@@ -6,6 +6,7 @@ import com.ohouse.web.domain.order.OrderRequestDTO;
 import com.ohouse.web.service.order.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -52,15 +53,13 @@ public class OrderController {
 
     @PostMapping("/payment/create.htm")
     @ResponseBody
-    public String orderCreate(@RequestBody String body, HttpSession session) {
+    public String orderCreate(@RequestBody String body, HttpSession session,
+                              @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) {
         try {
             ObjectMapper om = new ObjectMapper();
             OrderRequestDTO orderRequestDTO = om.readValue(body, OrderRequestDTO.class);
-
-            int member_id = 4;
             List<Integer> cart_items_ids = (List<Integer>) session.getAttribute("selectedCartItemsIds");
-            int order_id = orderService.insertOrder(member_id, orderRequestDTO, cart_items_ids);
-            session.setAttribute("order_id",order_id);
+            this.orderService.insertOrder(member_id,orderRequestDTO,cart_items_ids);
             return "{\"success\":true}";
         } catch (Exception e) {
             String msg = e.getMessage() == null ? "" : e.getMessage().replace("\"", "\\\"");
@@ -68,11 +67,16 @@ public class OrderController {
         }
     }
     @GetMapping("/payment/success.htm")
-    public String paymentSuccess(  @RequestParam("orderName") String orderName,HttpSession session,Model model) {
-        int order_id = (Integer) session.getAttribute("order_id");
+    public String paymentSuccess(
+            @RequestParam("orderName") String orderName,
+            @RequestParam("tossOrderId") String tossOrderId,
+            HttpSession session,
+            Model model) {
+
         model.addAttribute("orderName", orderName);
-        model.addAttribute("order_id", order_id);
-        return "/payment/success";
+        model.addAttribute("tossOrderId", tossOrderId);
+
+        return "/product/ordersuccess";
     }
 
 }
