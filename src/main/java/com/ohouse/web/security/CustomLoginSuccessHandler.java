@@ -8,17 +8,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+
+import com.ohouse.web.service.auth.LegacyPasswordUpgradeService;
 
 import lombok.extern.log4j.Log4j;
 
 @Component
 @Log4j
 public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
-    @org.springframework.beans.factory.annotation.Autowired
-    private com.ohouse.web.service.auth.LegacyPasswordUpgradeService passwordUpgradeService;
+    @Autowired
+    private LegacyPasswordUpgradeService passwordUpgradeService;
 
     @Override
 
