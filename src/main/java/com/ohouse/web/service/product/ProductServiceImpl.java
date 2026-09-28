@@ -43,4 +43,9 @@ public class ProductServiceImpl implements ProductService {
     public ProductOptionDTO productOption(long product_id,List<Long> option_value_ids) throws SQLException {
         return this.productMapper.findProductOption(product_id,option_value_ids,option_value_ids.size());
     }
+
+    @Override
+    public List<ProductDTO> getProductListByCategories(List<Integer> categoryIds, String sort) throws SQLException {
+        return this.productMapper.viewProductByCategories(categoryIds,sort);
+    }
 }
