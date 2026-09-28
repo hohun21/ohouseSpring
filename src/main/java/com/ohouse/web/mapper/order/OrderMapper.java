@@ -1,8 +1,12 @@
 package com.ohouse.web.mapper.order;
 
+import com.ohouse.web.domain.member.MyOrderDTO;
+import com.ohouse.web.domain.member.MyOrderDetailDTO;
 import com.ohouse.web.domain.order.OrderDetailRequestDTO;
 import com.ohouse.web.domain.order.OrderRequestDTO;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface OrderMapper {
     int selectOrderId();
@@ -25,4 +29,7 @@ public interface OrderMapper {
     int updateStock(
             OrderDetailRequestDTO dto
     );
+    List<MyOrderDTO> viewMyOrder(int member_id);
+
+    List<MyOrderDetailDTO> viewMyOrderDetail(int order_id);
 }

@@ -1,36 +1,37 @@
 package com.ohouse.web.domain.security;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import com.ohouse.web.domain.member.MemberVO;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import com.ohouse.web.domain.member.MemberVO;
-
-import lombok.Getter;
-import lombok.extern.log4j.Log4j;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Getter
 @Log4j
 public class CustomerUser extends User {
 
-	private MemberVO member_vo;
-	
-	public CustomerUser(String username
-					, String password
-					, boolean enabled
-					, boolean accountNonExpired
-					, boolean credentialsNonExpired
-					, boolean accountNonLocked
-					, Collection<? extends GrantedAuthority> authorities) {
-		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-		
-		log.info("❤️ CustomUserDetailsService.loadUserByUsername...");
-	}
-	
+    private MemberVO member_vo;
+
+
+    public CustomerUser(
+			String username
+            , String password
+            , boolean enabled
+            , boolean accountNonExpired
+            , boolean credentialsNonExpired
+            , boolean accountNonLocked
+            , Collection<? extends GrantedAuthority> authorities) {
+        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
+
+        log.info("❤️ CustomUserDetailsService.loadUserByUsername...");
+    }
+
 	public CustomerUser(MemberVO memberVO) {
+
 	    super(
 	    	memberVO.getId(),
 	        memberVO.getPassword(),
@@ -43,10 +44,12 @@ public class CustomerUser extends User {
 	            .collect(Collectors.toList())
 	    );
 
-	    this.member_vo = memberVO;
 
-	    log.info("CustomerUser authenticated: " + memberVO.getId());
+		this.member_vo = memberVO;
+
+		log.info("CustomerUser authenticated: " + memberVO.getId());
 	}
+
 	
 	public String getName() {
 		return member_vo != null ? member_vo.getName() : null;
