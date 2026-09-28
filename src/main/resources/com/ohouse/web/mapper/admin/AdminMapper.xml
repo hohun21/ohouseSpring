@@ -5,7 +5,19 @@
 
 <mapper namespace="com.ohouse.web.mapper.admin.AdminMapper">
 
-    <select id="getAllMembers" resultType="com.ohouse.web.domain.member.MemberDTO">
+	<resultMap id="adminMemberMap" type="com.ohouse.web.domain.member.MemberVO">
+	    <id property="memberId" column="memberId"/>
+	    <result property="id" column="id"/>
+	    <result property="name" column="name"/>
+	    <result property="regDate" column="regDate"/>
+	    <result property="status" column="status"/>
+	    <collection property="authList"
+	                ofType="com.ohouse.web.domain.auth.AuthoritiesVO">
+	        <result property="authority" column="role"/>
+	    </collection>
+	</resultMap>
+
+    <select id="getAllMembers" resultMap="adminMemberMap">
         SELECT 
             m.member_id AS memberId, 
             m.id, 
@@ -22,7 +34,7 @@
         SELECT COUNT(*) FROM member
     </select>
 
-    <select id="getMemberListWithPaging" resultType="com.ohouse.web.domain.member.MemberDTO">
+    <select id="getMemberListWithPaging" resultMap="adminMemberMap">
         SELECT * FROM (
             SELECT a.*, ROWNUM rnum FROM (
                 SELECT 

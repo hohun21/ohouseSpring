@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/member/")
+@RequestMapping("/member")
 public class MemberController {
 
     private final MemberService memberService;
@@ -37,4 +37,5 @@ public class MemberController {
         model.addAttribute("orderdto",orderdto);
         return "member/myShopping";
     }
+
 }

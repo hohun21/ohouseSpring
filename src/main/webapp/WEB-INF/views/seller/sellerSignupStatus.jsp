@@ -432,7 +432,8 @@ $(function () {
             data: {
                 email: email,
                 password: password,
-                businessNumber: businessNumber
+                businessNumber: businessNumber,
+                "${_csrf.parameterName}": "${_csrf.token}"
             }
         })
 

@@ -75,6 +75,7 @@
     <div class="container">
         <div class="password-form-wrapper">
             
+            <c:if test="${not empty passwordError}"><p class="server-error"><c:out value="${passwordError}"/></p></c:if>
             <form action="${pageContext.request.contextPath}/changePwdPro.htm" method="post" id="passwordForm">
                 
                 <!-- 1. 현재 비밀번호 -->
@@ -101,6 +102,7 @@
 
                 <button type="submit" id="changeButton" class="btn-change" disabled>완료</button>
                 <div class="form-notice">비밀번호를 바꾸면 새 비밀번호로 다시 로그인해주세요.</div>
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             </form>
         </div>
     </div>
@@ -142,42 +144,51 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     currentPwd.addEventListener("blur", function () {
-        const val = currentPwd.value.trim();
-        if (val === "") {
-            currentPwd.classList.add("error-input");
+        const val = currentPwd.value;
+        if (!val) {
             currentPwdError.textContent = "꼭 입력해야 해요.";
             currentPwdError.classList.add("show");
-            isCurrentPwdValid = false;
             checkFormValidity();
             return;
         }
 
+        const params = new URLSearchParams();
+        params.append("currentPwd", val);
+        params.append("${_csrf.parameterName}", "${_csrf.token}");
+
         fetch("${pageContext.request.contextPath}/checkCurrentPwd.ajax", {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-            body: "currentPwd=" + encodeURIComponent(val)
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Accept": "application/json"
+            },
+            body: params.toString()
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return response.json();
+        })
         .then(data => {
-            if (data.isMatch) {
-                currentPwd.classList.remove("error-input");
-                currentPwdError.classList.remove("show");
-                isCurrentPwdValid = true;
-            } else {
-                currentPwd.classList.add("error-input");
-                currentPwdError.textContent = "비밀번호가 일치하지 않아요.";
-                currentPwdError.classList.add("show");
-                isCurrentPwdValid = false;
-            }
+            // 요청 도중 입력값이 바뀌었다면 이전 응답을 적용하지 않음
+            if (currentPwd.value !== val) return;
+            isCurrentPwdValid = data.isMatch === true;
+            currentPwd.classList.toggle("error-input", !isCurrentPwdValid);
+            currentPwdError.textContent = "비밀번호가 일치하지 않아요.";
+            currentPwdError.classList.toggle("show", !isCurrentPwdValid);
+            checkFormValidity();
+        })
+        .catch(error => {
+            isCurrentPwdValid = false;
+            currentPwdError.textContent = "비밀번호 확인에 실패했어요. (" + error.message + ")";
+            currentPwdError.classList.add("show");
             checkFormValidity();
         });
     });
-
+    
     currentPwd.addEventListener("input", function () {
-        if (currentPwd.value.trim() !== "") {
-            currentPwd.classList.remove("error-input");
-            currentPwdError.classList.remove("show");
-        }
+        isCurrentPwdValid = false;
+        currentPwd.classList.remove("error-input");
+        currentPwdError.classList.remove("show");
         checkFormValidity();
     });
 

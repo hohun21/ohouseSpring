@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ohouse.web.domain.member.MemberDTO;
+import com.ohouse.web.domain.member.MemberVO;
 import com.ohouse.web.domain.seller.ProductDTO;
 import com.ohouse.web.domain.seller.SellerDTO;
 import com.ohouse.web.mapper.admin.AdminMapper;
@@ -53,7 +53,7 @@ public class AdminService {
         return result > 0;
     }
     
-    public List<MemberDTO> getAllMembers() {
+    public List<MemberVO> getAllMembers() {
         return adminMapper.getAllMembers();
     }
 
@@ -61,7 +61,7 @@ public class AdminService {
         return adminMapper.getTotalMemberCount();
     }
 
-    public List<MemberDTO> getMemberListWithPaging(int startRow, int endRow) {
+    public List<MemberVO> getMemberListWithPaging(int startRow, int endRow) {
         return adminMapper.getMemberListWithPaging(startRow, endRow);
     }
 
