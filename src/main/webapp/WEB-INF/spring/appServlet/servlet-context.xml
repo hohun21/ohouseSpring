@@ -29,4 +29,5 @@
 	<mvc:resources mapping="/resources/**" location="/resources/" />
 	
 	<mvc:resources mapping="/images/**" location="/images/" />
+
 </beans>

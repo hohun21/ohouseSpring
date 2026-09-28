@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohouse.web.mapper.cart.CartMapper">
+    <!-- selectCartList -->
+    <select id="selectCartList" resultType="com.ohouse.web.domain.cart.CartItemDTO">
+        SELECT cart_id,
+        cart_items_id,
+        b.brand_name,
+        b.brand_id,
+        p.product_name,
+        pi.image_url,
+        p.product_id,
+        po.sku,
+        po.price,
+        quantity,
+        ci.product_option_id
+        FROM cart_items ci
+        JOIN product_option po
+        ON ci.product_option_id = po.product_option_id
+        JOIN product p
+        ON p.product_id = po.product_id
+        JOIN product_image pi
+        ON p.product_id = pi.product_id
+        JOIN brand b
+        ON b.brand_id = p.brand_id
+        WHERE pi.sort_order = 1
+        AND cart_id = #{cart_id}
+        ORDER BY b.brand_name, ci.cart_items_id
+    </select>
+    <!-- findCartId -->
+    <select id="findCartID" resultType="int">
+        SELECT CART_ID FROM CART WHERE MEMBER_ID = #{member_id}
+    </select>
+    <!-- insertCart -->
+    <insert id="insert">
+
+        <foreach collection="cartItemDTOList" item="item">
+
+            MERGE INTO CART_ITEMS ci
+            USING (
+            SELECT #{item.product_option_id} PRODUCT_OPTION_ID,
+            #{cart_id} CART_ID,
+            #{item.quantity} QUANTITY
+            FROM dual
+            ) src
+            ON (
+            ci.PRODUCT_OPTION_ID = src.PRODUCT_OPTION_ID
+            AND ci.CART_ID = src.CART_ID
+            )
+            WHEN MATCHED THEN
+            UPDATE SET ci.QUANTITY = ci.QUANTITY + src.QUANTITY
+            WHEN NOT MATCHED THEN
+            INSERT (
+            PRODUCT_OPTION_ID,
+            CART_ID,
+            QUANTITY
+            )
+            VALUES (
+            src.PRODUCT_OPTION_ID,
+            src.CART_ID,
+            src.QUANTITY
+            )
+
+        </foreach>
+
+    </insert>
+    <!-- updateCartOption -->
+    <update id="updateCartOption">
+
+        UPDATE CART_ITEMS
+        SET PRODUCT_OPTION_ID = #{item.product_option_id},
+        QUANTITY = #{item.quantity}
+        WHERE CART_ITEMS_ID = #{item.cart_items_id}
+        AND CART_ID = #{cart_id}
+
+    </update>
+    <!-- updateCartQuantity -->
+    <update id="updateCartQuantity">
+        UPDATE CART_ITEMS
+        SET QUANTITY = #{cartItemDTO.quantity}
+        WHERE CART_ITEMS_ID = #{cartItemDTO.cart_items_id}
+        AND CART_ID = #{cart_id}
+    </update>
+    <!-- selectCartOptions -->
+    <select id="selectCartOptions"
+            resultType="com.ohouse.web.domain.cart.CartOptionDTO">
+
+        SELECT
+        og.group_name AS option_group_name,
+        ov.option_name AS option_value_name
+        FROM product_option_value pov
+        JOIN option_value ov
+        ON pov.option_value_id = ov.option_value_id
+        JOIN option_group og
+        ON ov.option_group_id = og.option_group_id
+        WHERE pov.product_option_id = #{product_option_id}
+        ORDER BY og.sort_order, ov.sort_order
+
+    </select>
+    <delete id="deleteCartItems">
+        DELETE FROM CART_ITEMS
+        WHERE CART_ID = #{cart_id}
+        AND CART_ITEMS_ID IN
+        <foreach collection="cartItemIds"
+                 item="cart_items_id"
+                 open="("
+                 separator=","
+                 close=")">
+            #{cart_items_id}
+        </foreach>
+    </delete>
+    <!-- updateTotalPrice -->
+    <update id="updateTotalPrice">
+        UPDATE CART
+        SET TOTAL_PRICE = (
+        SELECT NVL(SUM(ci.QUANTITY * po.PRICE), 0)
+        FROM CART_ITEMS ci
+        JOIN PRODUCT_OPTION po
+        ON ci.PRODUCT_OPTION_ID = po.PRODUCT_OPTION_ID
+        WHERE ci.CART_ID = #{cart_id}
+        )
+        WHERE CART_ID = #{cart_id}
+    </update>
+</mapper>

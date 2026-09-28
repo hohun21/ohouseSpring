@@ -12,19 +12,18 @@
         <a href="${pageContext.request.contextPath}/main.htm" class="btn-home">
             홈으로 가기
         </a>
-        <a href="${pageContext.request.contextPath}/order/order.htm" class="btn-order">
+
             주문내역 확인
-        </a>
+
     </div>
 </div>
-</main>
+
 
 <style>
     .payment-success {
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 500px;
         padding: 60px 20px;
     }
 

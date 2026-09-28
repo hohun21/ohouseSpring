@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohouse.web.mapper.order.OrderMapper">
+    <select id="selectOrderId" resultType="int">
+        SELECT ORDERS_SEQ.NEXTVAL
+        FROM DUAL
+    </select>
+
+    <insert id="insertOrder">
+
+        INSERT INTO ORDERS (
+        ORDER_ID,
+        MEMBER_ID,
+        ADDRESS_ID,
+        REQUEST_MSG,
+        ORDER_NAME,
+        TOTAL_PRICE,
+        COUPON_DISCOUNT,
+        DELIVERY_FEE,
+        PAYMENT_PRICE,
+        MEMBER_COUPON_ID,
+        TOSS_ORDER_ID
+        )
+        VALUES (
+        #{order_id},
+        #{member_id},
+        #{dto.addressId},
+        #{dto.requestMsg},
+        #{dto.orderName},
+        #{dto.totalPrice},
+        #{dto.couponDiscount},
+        #{dto.deliveryFee},
+        #{dto.paymentPrice},
+        #{dto.memberCouponId, jdbcType=NUMERIC},
+        #{dto.tossOrderId}
+        )
+
+    </insert>
+
+    <select id="findBrandIdByProductOptionId" resultType="long">
+        SELECT p.BRAND_ID
+        FROM PRODUCT_OPTION po
+        JOIN PRODUCT p
+          ON p.PRODUCT_ID = po.PRODUCT_ID
+        WHERE po.PRODUCT_OPTION_ID = #{productOptionId}
+    </select>
+
+    <insert id="insertOrderDetail">
+        INSERT INTO ORDERS_DETAIL (
+            ORDERS_DETAIL_ID,
+            ORDER_ID,
+            PRODUCT_OPTION_ID,
+            BRAND_ID,
+            IMG_URL,
+            PRODUCT_NAME,
+            OPTION_NAME,
+            PRICE,
+            QUANTITY
+        )
+        VALUES (
+            SEQ_ORDERS_DETAIL.NEXTVAL,
+            #{order_id},
+            #{dto.productOptionId},
+            #{dto.brandId},
+            #{dto.imgUrl},
+            #{dto.productName},
+            #{dto.optionName},
+            #{dto.price},
+            #{dto.quantity}
+        )
+    </insert>
+
+    <update id="updateStock">
+        UPDATE PRODUCT_OPTION
+        SET STOCK = STOCK - #{quantity}
+        WHERE PRODUCT_OPTION_ID = #{productOptionId}
+          AND STOCK >= #{quantity}
+    </update>
+</mapper>
