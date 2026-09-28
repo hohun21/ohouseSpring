@@ -83,7 +83,7 @@ public class SellerAuthController {
 
 			session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
 			
-			return "redirect:/main.htm";
+			return "redirect:/seller/sellerSignupStatus.htm";
 
 		} catch (IllegalArgumentException | IllegalStateException e) {
 			model.addAttribute("email", email);
@@ -143,8 +143,8 @@ public class SellerAuthController {
 	public ResponseEntity<Map<String, Object>> duplicate(@RequestParam Map<String, String> params, HttpServletRequest request) {
 
 		String path = request.getServletPath();
-		String key = path.equals("/emailcheck.ajax") ? "email" : path.equals("/brandnamecheck.ajax") ? "brandName" :
-			path.equals("/businessnumbercheck.ajax") ? "businessNumber" : "mailOrderNumber";
+		String key = path.equals("/seller/emailcheck.ajax") ? "email" : path.equals("/seller/brandnamecheck.ajax") ? "brandName" :
+			path.equals("/seller/businessnumbercheck.ajax") ? "businessNumber" : "mailOrderNumber";
 		String value = params.get(key);
 
 		Map<String, Object> response = new HashMap<>();

@@ -608,7 +608,7 @@ $(function () {
 
         requestDuplicateCheck({
             stateKey: "businessNumber", value: () => businessNumber, validate: v => /^\d{10}$/.test(v),
-            url: "/businessnumbercheck.ajax", parameter: "businessNumber", messageSelector: "#businessNumberMessage",
+            url: "/seller/businessnumbercheck.ajax", parameter: "businessNumber", messageSelector: "#businessNumberMessage",
             invalidMessage: "사업자 등록번호 10자리를 입력해 주세요.", successMessage: "사용 가능한 사업자 등록번호입니다.",
             duplicateMessage: "이미 등록된 사업자 등록번호입니다."
         });
