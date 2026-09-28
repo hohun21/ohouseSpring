@@ -626,7 +626,7 @@
             <!-- 2. 리뷰 -->
            	<section id="detail-review" class="tab-content">
                 <jsp:include page="/WEB-INF/views/product/review/reviewList.jsp">
-                    <jsp:param name="product_id" value="${pdto.productDTO.productId != null? productId : 3377041}"/>
+                    <jsp:param name="product_id" value="${pdto.productDTO.product_id}"/>
                     <jsp:param name="member_id" value="${memberId != null ? memberId : 2}"/>
                 </jsp:include>
             </section> 

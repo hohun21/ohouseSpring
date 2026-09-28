@@ -3,10 +3,20 @@ package com.ohouse.web.controller.product;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ohouse.member.dto.AuthUserDTO;
 import com.ohouse.web.domain.product.ProductDetailDTO;
 import com.ohouse.web.domain.product.ProductOptionDTO;
+import com.ohouse.web.domain.product.review.OptionFilterDTO;
+import com.ohouse.web.domain.product.review.PageDTO;
+import com.ohouse.web.domain.product.review.ReviewDTO;
+import com.ohouse.web.domain.product.review.ReviewPageDTO;
+import com.ohouse.web.domain.product.review.ReviewSummaryDTO;
 import com.ohouse.web.service.product.ProductService;
+import com.ohouse.web.service.product.ReviewService;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,15 +32,66 @@ import java.util.List;
 @Controller
 @RequestMapping(value="/product")
 @RequiredArgsConstructor
+@Log4j
 public class ProductController {
 
     private final ProductService productService;
    private ObjectMapper objectMapper = new ObjectMapper();
-
+   private final ReviewService reviewService;
     @GetMapping(value="/productDetail.htm")
-    public String productDetail(Model model, @RequestParam("product_id") long product_id) throws SQLException {
+    public String productDetail(Model model, @RequestParam("product_id") long product_id) throws SQLException, ClassNotFoundException {
         ProductDetailDTO pdto = productService.productDetail(product_id);
         model.addAttribute("pdto", pdto);
+        
+        
+        
+        //-------------------리뷰 파트 ------------------------
+        
+        log.info("productDetail hosted - product_id: " + product_id);
+        
+        // 1. 사용자 인증 정보 세팅 (리뷰 작성자 체크 및 관리자 여부 확인용)
+        AuthUserDTO authUser = new AuthUserDTO(1, "ADMIN","관리자","role");//(AuthUserDTO) session.getAttribute("authUser");
+        int memberId = 0;
+        String role = "";
+        
+        if(authUser != null) {
+            memberId = authUser.getMemberId();
+            role = authUser.getRole();
+        }
+        boolean isAdmin = "ADMIN".equals(role);
+
+        int currentPage = 1;
+        int numberPerPage = 5;
+        
+        // 2. 리뷰 관련 DTO 조립 (초기 진입 시 기본 'best' 정렬 기준)
+        ReviewPageDTO reqDTO = ReviewPageDTO.builder()
+                .productId(product_id)
+                .currentPage(currentPage)
+                .numberPerPage(numberPerPage)
+                .sort("best")
+                .memberId(memberId)
+                .build();
+
+        // 3. 리뷰 서비스 데이터 조회
+        List<ReviewDTO> reviewList = reviewService.getReviewList(reqDTO);
+        ReviewSummaryDTO reviewSummary = reviewService.getReviewSummary(product_id);
+        int totalRecords = reviewService.getTotalRecords(reqDTO);
+        List<OptionFilterDTO> optionFilterList = reviewService.getOptionFilterList(product_id);
+        PageDTO pageDTO = new PageDTO(totalRecords, currentPage, numberPerPage);
+
+        // 4. 상세 페이지 및 내부 JSP(reviewList.jsp)에서 사용할 데이터 Model에 모두 담기
+        model.addAttribute("product_id", product_id);
+        model.addAttribute("reviewList", reviewList);
+        model.addAttribute("reviewSummary", reviewSummary);
+        model.addAttribute("pageDTO", pageDTO);
+        model.addAttribute("currentSort", "best");
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("optionFilterList", optionFilterList);
+        
+        
+        
+        
+        
         return "product/product_detail";
     }
     @GetMapping("/productOption.htm")
@@ -57,6 +118,13 @@ public class ProductController {
         System.out.println(json);
         System.out.println("========================================");
 
+        
+        
+        
+        
+        
+        
+        
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.parseMediaType("application/json;charset=UTF-8"))

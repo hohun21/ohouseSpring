@@ -18,29 +18,47 @@
 </resultMap>
 
 <!-- 옵션 필터 목록 통합 조회 (널 값 및 중복 제거 버전) -->
-<select id="selectOptionFilterList" parameterType="long" resultMap="optionFilterParentMap">
+<!-- 1. 옵션 그룹 개수 확인 쿼리 -->
+<select id="countRequiredOptionGroup" parameterType="long" resultType="int">
+    SELECT COUNT(*) FROM OPTION_GROUP WHERE PRODUCT_ID = #{productId} AND REQUIRED = 1
+</select>
+
+<!-- 2. [단일 옵션 상품용] 옵션 조회 쿼리 -->
+<select id="selectSingleOptionFilterList" parameterType="long" resultType="java.util.Map">
     SELECT 
-        ov1.OPTION_VALUE_ID AS OPTION_VALUE_ID,
-        ov1.OPTION_NAME AS OPTION_VALUE_NAME,
+        og.OPTION_GROUP_ID AS PARENT_VAL_ID,
+        og.GROUP_NAME AS PARENT_VAL_NAME,
         po.PRODUCT_OPTION_ID AS PRODUCT_OPTION_ID,
-        ov2.OPTION_NAME AS SUB_OPTION_NAME
+        ov.OPTION_NAME AS SUB_OPTION_NAME
+    FROM OPTION_GROUP og
+    JOIN OPTION_VALUE ov ON og.OPTION_GROUP_ID = ov.OPTION_GROUP_ID
+    JOIN PRODUCT_OPTION_VALUE pov ON ov.OPTION_VALUE_ID = pov.OPTION_VALUE_ID
+    JOIN PRODUCT_OPTION po ON pov.PRODUCT_OPTION_ID = po.PRODUCT_OPTION_ID
+    WHERE og.PRODUCT_ID = #{productId}
+      AND po.STATUS = 'ACTIVE'
+    ORDER BY ov.SORT_ORDER, po.PRODUCT_OPTION_ID
+</select>
+
+<!-- 3. [복수 옵션 상품용] 옵션 조회 쿼리 -->
+<select id="selectMultiOptionFilterList" parameterType="long" resultType="java.util.Map">
+    SELECT DISTINCT
+        ov1.OPTION_VALUE_ID AS PARENT_VAL_ID,
+        ov1.OPTION_NAME AS PARENT_VAL_NAME,
+        po.PRODUCT_OPTION_ID,
+        ov2.OPTION_NAME AS SUB_OPTION_NAME,
+        og1.SORT_ORDER AS P_SORT,
+        og2.SORT_ORDER AS S_SORT
     FROM PRODUCT_OPTION po
-    -- 1차 옵션 값 조인 (SORT_ORDER가 1인 그룹)
     JOIN PRODUCT_OPTION_VALUE pov1 ON po.PRODUCT_OPTION_ID = pov1.PRODUCT_OPTION_ID
     JOIN OPTION_VALUE ov1 ON pov1.OPTION_VALUE_ID = ov1.OPTION_VALUE_ID
     JOIN OPTION_GROUP og1 ON ov1.OPTION_GROUP_ID = og1.OPTION_GROUP_ID AND og1.SORT_ORDER = 1
-    
-    -- 2차 옵션 값 조인 (SORT_ORDER가 2인 그룹)
-    JOIN PRODUCT_OPTION_VALUE pov2 ON po.PRODUCT_OPTION_ID = pov2.PRODUCT_OPTION_ID
+    JOIN PRODUCT_OPTION_VALUE pov2 ON po.PRODUCT_OPTION_ID = pov2.PRODUCT_OPTION_ID AND pov2.OPTION_VALUE_ID != ov1.OPTION_VALUE_ID
     JOIN OPTION_VALUE ov2 ON pov2.OPTION_VALUE_ID = ov2.OPTION_VALUE_ID
-    JOIN OPTION_GROUP og2 ON ov2.OPTION_GROUP_ID = og2.OPTION_GROUP_ID AND og2.SORT_ORDER = 2
-    
+    JOIN OPTION_GROUP og2 ON ov2.OPTION_GROUP_ID = og2.OPTION_GROUP_ID AND og2.SORT_ORDER > 1
     WHERE po.PRODUCT_ID = #{productId}
       AND po.STATUS = 'ACTIVE'
-      AND ov2.OPTION_NAME IS NOT NULL
-    ORDER BY ov1.SORT_ORDER, ov2.SORT_ORDER
+    ORDER BY og1.SORT_ORDER, og2.SORT_ORDER, po.PRODUCT_OPTION_ID
 </select>
-
 <!-- 2. 리뷰 목록 조회 -->
 <select id="selectReviewList" parameterType="com.ohouse.web.domain.product.review.ReviewPageDTO" resultType="com.ohouse.web.domain.product.review.ReviewDTO">
     SELECT * FROM (

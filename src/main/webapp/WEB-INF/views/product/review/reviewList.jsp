@@ -972,7 +972,14 @@ function openReviewModal() {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product_id') || '${product_id}';
 
-    fetch('${pageContext.request.contextPath}/checkReview.htm?product_id=' + productId)
+    //임시!!!!
+    /* var modal = document.getElementById('review-write-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } */
+    //임시!!!!
+    
+    fetch('${pageContext.request.contextPath}/review/checkReview.htm?product_id=' + productId)
         .then(response => {
             if (!response.ok) throw new Error("서버 통신 실패");
             return response.json();
@@ -994,7 +1001,7 @@ function openReviewModal() {
         .catch(error => {
             console.error("리뷰 작성 여부 확인 중 에러 발생:", error);
             alert("오류가 발생했습니다. 다시 시도해 주세요.");
-        });
+        }); 
 }
 // 리뷰 작성 모달 닫기
 function closeReviewModal() {

@@ -26,7 +26,7 @@ public interface ReviewService {
     // 5. 리뷰 등록 (이미지 포함)
     boolean registerReview(ReviewDTO reviewDTO, MultipartFile reviewImage) throws ClassNotFoundException, SQLException, Exception;
     // 6. 리뷰 수정 (이미지 포함)
-    boolean modifyReview(ReviewDTO reviewDTO, String imageUrl) throws ClassNotFoundException, SQLException;
+    boolean modifyReview(ReviewDTO reviewDTO, MultipartFile reviewImage) throws ClassNotFoundException, SQLException;
 
     // 7. 리뷰 삭제 (관련 좋아요/이미지 데이터 함께 정리)
     boolean removeReview(int reviewId) throws ClassNotFoundException, SQLException;

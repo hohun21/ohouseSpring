@@ -2,6 +2,7 @@ package com.ohouse.web.mapper.product;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -17,8 +18,10 @@ public interface ReviewMapper {
 
 		int getTotalRecords(ReviewPageDTO reqDTO) throws ClassNotFoundException, SQLException ;
 
-		List<OptionFilterDTO> selectOptionFilterList(long productId) throws ClassNotFoundException, SQLException ;
-
+		/*
+		 * List<OptionFilterDTO> selectOptionFilterList(long productId) throws
+		 * ClassNotFoundException, SQLException ;
+		 */
 		int isReviewLiked(@Param("reviewId") int reviewId, @Param("memberId") int memberId) throws ClassNotFoundException, SQLException ;
 
 		int insertReviewLike(@Param("reviewId") int reviewId, @Param("memberId") int memberId) throws ClassNotFoundException, SQLException ;
@@ -54,11 +57,17 @@ public interface ReviewMapper {
 		boolean hasUserPurchased(@Param("memberId") int memberId, @Param("productId") long productId) throws ClassNotFoundException, SQLException ;
 
 
-		boolean hasUserReviewedProduct(@Param("memberId") long memberId, @Param("productId") long productId) throws ClassNotFoundException, SQLException ;
+		int hasUserReviewedProduct(@Param("memberId") long memberId, @Param("productId") long productId) throws ClassNotFoundException, SQLException ;
 
 		ReviewDTO findLatestOrderInfo(@Param("memberId") int memberId, @Param("productId") long productId) throws ClassNotFoundException, SQLException ;
 
 		int saveAdminReply(@Param("reviewId") int reviewId, @Param("adminReply")String adminReply, @Param("isAdmin")boolean isAdmin) throws ClassNotFoundException, SQLException ;
+
+		List<Map<String, Object>> selectMultiOptionFilterList(long productId);
+
+		List<Map<String, Object>> selectSingleOptionFilterList(long productId);
+
+		int countRequiredOptionGroup(long productId);
 
 
 }	

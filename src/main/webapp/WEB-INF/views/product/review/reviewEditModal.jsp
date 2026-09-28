@@ -10,7 +10,7 @@
         </div>
 
         <!-- 모달 Form Body -->
-        <form id="editReviewForm" action="${pageContext.request.contextPath}/editReview.htm" method="post" enctype="multipart/form-data" style="padding: 24px;">
+        <form id="editReviewForm" action="${pageContext.request.contextPath}/review/editReview.htm" method="post" enctype="multipart/form-data" style="padding: 24px;">
             
             <!-- 숨어있는 식별 번호들 -->
             <input type="hidden" id="editReviewId" name="reviewId">

@@ -3,6 +3,7 @@ package com.ohouse.web.controller.product;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -132,7 +134,7 @@ public class ReviewController {
 	// ==========================================
     // 2. 리뷰 작성 (WriteReviewHandler 대체)
     // ==========================================
-    @PostMapping("/review/write.htm")
+    @PostMapping("/review/writeReview.htm")
     public String writeReview(
             @RequestParam("productId") int productId,
             @RequestParam("rating") int rating,
@@ -291,7 +293,7 @@ public class ReviewController {
 	// ==========================================
 	// 5. 리뷰 삭제 (DeleteReviewHandler 대체)
 	// ==========================================
-	@GetMapping("/review/delete.htm")
+	@GetMapping("/review/deleteReview.htm")
 	public String deleteReview(
 			@RequestParam("reviewId") int reviewId,
 			HttpSession session, HttpServletRequest request) throws Exception {
@@ -316,93 +318,44 @@ public class ReviewController {
 		String referer = request.getHeader("referer");
 		return "redirect:" + (referer != null ? referer : "/index.htm");
 	}
-
-	// ==========================================
-	// 6. 리뷰 수정 (EditReviewHandler 대체 - 간소화 버전)
-	// ==========================================
-	@PostMapping("/review/edit.htm")
+	// 2. 리뷰 작성 (EditReviewHandler 대체)
+	@PostMapping("/review/editReview.htm")
 	public String editReview(
-			@RequestParam("reviewId") int reviewId,
-			@RequestParam("productId") int productId,
-			@RequestParam("rating") int rating,
-			@RequestParam("content") String content,
-			@RequestParam(value = "reviewImage", required = false) MultipartFile reviewImage,
-			HttpSession session, HttpServletRequest request) throws Exception {
+	        @RequestParam("reviewId") int reviewId,
+	        @RequestParam("productId") int productId,
+	        @RequestParam("rating") int rating,
+	        @RequestParam("content") String content,
+	        @RequestParam(value = "reviewImage", required = false) MultipartFile reviewImage,
+	        HttpSession session, HttpServletRequest request) throws Exception {
 
-		AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
-		//------------임시--------------
+	    AuthUserDTO authUser = (AuthUserDTO) session.getAttribute("authUser");
+	    if (authUser == null) {
+	        authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
+	        session.setAttribute("authUser", authUser);
+	    }
 
-		authUser = (AuthUserDTO) session.getAttribute("authUser");
-		if (authUser == null) {
-			authUser = new AuthUserDTO(1, "admin", "관리자", "ADMIN");
-			session.setAttribute("authUser", authUser);
-		}
-		int memberId = authUser.getMemberId();
+	    // DTO 세팅
+	    ReviewDTO reviewDTO = new ReviewDTO();
+	    reviewDTO.setReviewId(reviewId);
+	    reviewDTO.setMemberId(authUser.getMemberId());
+	    reviewDTO.setRating(rating);
+	    reviewDTO.setContent(content);
 
-		//-----------------------------
-		if (authUser == null) {
-			return "redirect:/login.htm";
-		}
+	    // 💡 복잡한 R2 로직은 다 빼고, DTO와 MultipartFile만 서비스로 던집니다!
+	    boolean success = reviewService.modifyReview(reviewDTO, reviewImage);
 
-		String imageUrl = null;
-
-		// 1. 이미지가 새로 업로드된 경우에만 R2 처리 수행
-		if (reviewImage != null && !reviewImage.isEmpty()) {
-			String originalFileName = reviewImage.getOriginalFilename();
-			String savedFileName = UUID.randomUUID().toString() + "_" + originalFileName;
-			String objectKey = "reviews/" + savedFileName;
-
-			// R2 설정값 (기존 핸들러와 동일)
-			String r2Endpoint = "https://c118a7efdddd35d3edac1db3a63ed76d.r2.cloudflarestorage.com";
-			String r2AccessKey = "8f8a91958a3c06d4ce11ba80f5d60e2f";
-			String r2SecretKey = "5ab97a22e5baa3fe630165a9e770f0eada870d8672aaea80d3258ccbc2440667";
-			String r2Bucket = "productimage";
-			String r2PublicUrl = "https://pub-3490b121289f419194b634a98c9d4ba5.r2.dev";
-
-			S3Configuration s3Configuration = S3Configuration.builder().chunkedEncodingEnabled(false).build();
-
-			try (S3Client s3Client = S3Client.builder()
-					.endpointOverride(URI.create(r2Endpoint))
-					.region(Region.of("auto"))
-					.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(r2AccessKey, r2SecretKey)))
-					.serviceConfiguration(s3Configuration)
-					.build()) {
-
-				PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-						.bucket(r2Bucket)
-						.key(objectKey)
-						.contentType(reviewImage.getContentType())
-						.build();
-
-				// MultipartFile은 바로 bytes로 읽을 수 있어 훨씬 간편합니다.
-				s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromBytes(reviewImage.getBytes()));
-
-				imageUrl = r2PublicUrl + "/" + objectKey;
-			}
-		}
-
-		// 2. DTO 세팅
-		ReviewDTO reviewDTO = new ReviewDTO();
-		reviewDTO.setReviewId(reviewId);
-		reviewDTO.setMemberId(authUser.getMemberId());
-		reviewDTO.setRating(rating);
-		reviewDTO.setContent(content);
-
-		// 3. 서비스 호출 (String 타입의 imageUrl 전달)
-		boolean success = reviewService.modifyReview(reviewDTO, imageUrl);
-
-		if (success) {
-			return "redirect:/product/productDetail.htm?product_id=" + productId;
-		} else {
-			request.setAttribute("errorMessage", "리뷰 수정에 실패했습니다.");
-			return "common/error";
-		}
+	    if (success) {
+	        return "redirect:/product/productDetail.htm?product_id=" + productId;
+	    } else {
+	        request.setAttribute("errorMessage", "리뷰 수정에 실패했습니다.");
+	        return "common/error";
+	    }
 	}
-
+	
 	// ==========================================
 	// 8. 리뷰 작성 가능 여부 체크 (ReviewCheckHandler 대체)
 	// ==========================================
-	@GetMapping("/review/check.htm")
+	@GetMapping("/review/checkReview.htm")
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> checkReviewable(
 			@RequestParam(value = "product_id", defaultValue = "0") long productId,
@@ -425,7 +378,14 @@ public class ReviewController {
 
 		boolean hasReviewed = reviewService.checkAndValidateUserReview(authUser.getMemberId(), productId);
 
-		return ResponseEntity.ok(Map.of("hasReviewed", hasReviewed));
+		// 💡 Map.of() 대신 HashMap 사용으로 JSON 변환 안정성 확보
+	    Map<String, Object> responseMap = new HashMap<>();
+	    responseMap.put("hasReviewed", hasReviewed);
+
+	    // produces 설정으로 브라우저에게 확실하게 JSON을 보낸다고 알려줌
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .body(responseMap);
 	}
 
 	// ==========================================

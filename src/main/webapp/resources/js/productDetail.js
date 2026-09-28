@@ -522,7 +522,7 @@ function closeEditReviewModal() {
 // 리뷰 삭제 요청 함수
 function deleteReview(reviewId, productId) {
     if (confirm("정말 삭제하시겠습니까?")) {
-		location.href = "/deleteReview.htm?reviewId=" + reviewId;
+		location.href = "/review/deleteReview.htm?reviewId=" + reviewId;
        }
 }
 
