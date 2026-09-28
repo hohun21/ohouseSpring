@@ -18,7 +18,7 @@ public interface SellerMapper {
     List<ProductDTO> getAllProductsForAdmin();
 
     // 2. 상품 등록 및 관리
-    int getBrandId(@Param("brandName") String brandName);
+    Integer getBrandId(@Param("brandName") String brandName);
 
     int insertProduct(ProductDTO dto);
     ProductDTO getProductById(@Param("productId") int productId);

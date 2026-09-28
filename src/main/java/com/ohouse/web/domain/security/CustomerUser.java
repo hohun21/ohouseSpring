@@ -48,5 +48,7 @@ public class CustomerUser extends User {
 	    log.info("CustomerUser authenticated: " + memberVO.getId());
 	}
 	
-	
+	public String getName() {
+		return member_vo != null ? member_vo.getName() : null;
+	}
 }

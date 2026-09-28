@@ -80,7 +80,7 @@ public class SellerAuthController {
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(new UsernamePasswordAuthenticationToken(auth, null, AuthorityUtils.createAuthorityList("ROLE_SELLER")));
             SecurityContextHolder.setContext(context);
-
+            
             session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
             return "redirect:/main.htm";
 
