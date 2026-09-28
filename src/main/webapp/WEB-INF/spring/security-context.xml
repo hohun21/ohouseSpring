@@ -11,7 +11,7 @@
     <security:http pattern="/static/**" security="none"></security:http>
     <security:http pattern="/design/**" security="none"></security:http>
 
-<<<<<<< HEAD
+
 	<!-- 웹 요청에 Spring Security 보안 설정을 적용하는 태그 -->
 	<security:http use-expressions="true">
 		<security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
