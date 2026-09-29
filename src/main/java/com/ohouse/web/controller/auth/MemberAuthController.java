@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.ohouse.web.domain.auth.AuthUser;
 import com.ohouse.web.domain.member.MemberVO;
+import com.ohouse.web.domain.security.CustomerUser;
 import com.ohouse.web.service.auth.MemberAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
@@ -82,9 +85,18 @@ public class MemberAuthController {
 
         	HttpSession session = request.getSession(true);
         	session.setAttribute(
-        	    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-        	    context
-        	);
+        	    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context );
+        	
+        	CustomerUser user = (CustomerUser) authentication.getPrincipal();
+        	MemberVO member = user.getMember_vo();
+
+        	session.setAttribute("authUser", new AuthUser(
+        	    member.getMemberId(),
+        	    member.getId(),
+        	    member.getName(),
+        	    "USER"
+        	));
+        	
         } catch (IllegalArgumentException e) {
             model.addAttribute("signupError", e.getMessage());
             return "member/signup";
@@ -135,8 +147,10 @@ public class MemberAuthController {
     public Map<String, Object> statusCheck(@RequestParam(required = false) String id) {
         Map<String, Object> result = new HashMap<>();
         if (id == null || id.trim().isEmpty()) {
-            result.put("success", false); result.put("status", null);
-            result.put("code", "INVALID_ID"); return result;
+            result.put("success", false); 
+            result.put("status", null);
+            result.put("code", "INVALID_ID"); 
+            return result;
         }
         Integer status = memberAuthService.statusCheck(id.trim());
         result.put("status", status);
