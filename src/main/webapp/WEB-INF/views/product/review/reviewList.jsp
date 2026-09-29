@@ -617,7 +617,7 @@
             if (!isLoggedIn) {
                 if (confirm("로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?")) {
                     const currentDetailUrl = window.location.pathname + window.location.search;
-                    window.location.href = '${pageContext.request.contextPath}/login.htm?referer=' + encodeURIComponent(currentDetailUrl);
+                    window.location.href = '${pageContext.request.contextPath}/auth/login.htm';
                 }
                 return; // 비로그인이면 서버 요청을 아예 안 보냄
             }
@@ -637,7 +637,7 @@
                     // 비로그인 상태일 때 401 응답을 받으면 상세 페이지 주소를 통째로 들고 로그인으로 이동
                     if (confirm("로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?")) {
                         const currentDetailUrl = window.location.pathname + window.location.search;
-                        window.location.href = '${pageContext.request.contextPath}/login.htm?referer=' + encodeURIComponent(currentDetailUrl);
+                        window.location.href = '${pageContext.request.contextPath}/auth/login.htm';
                     }
                     return null;
                 }
