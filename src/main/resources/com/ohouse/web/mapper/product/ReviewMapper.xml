@@ -381,8 +381,10 @@
                             r.REG_DATE DESC, r.REVIEW_ID DESC
                         </otherwise>
                     </choose>
-            ) b WHERE ROWNUM &lt;= #{endRow}
-        ) WHERE rnum &gt;= #{startRow}
+            ) b 
+            WHERE ROWNUM &lt;= (#{currentPage} * #{numberPerPage})
+        ) 
+        WHERE rnum &gt;= ((#{currentPage} - 1) * #{numberPerPage} + 1)
     </select>
 
     <!-- 사용자의 상품 구매 여부 확인 -->

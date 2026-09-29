@@ -318,4 +318,16 @@ public class ReviewServiceImpl implements ReviewService {
 			throws ClassNotFoundException, SQLException {
 		return reviewMapper.hasUserReviewedProduct(memberId, productId)> 0;
 	}
+
+	@Override
+	public int selectMyReviewTotalCount(int memberId) throws ClassNotFoundException, SQLException {
+		// TODO Auto-generated method stub
+		return reviewMapper.selectMyReviewTotalCount(memberId);
+	}
+
+	@Override
+	public List<ReviewDTO> selectMyReviewList(ReviewPageDTO reqDTO) throws ClassNotFoundException, SQLException {
+		// TODO Auto-generated method stub
+		return reviewMapper.selectMyReviewList(reqDTO);
+	}
 }
