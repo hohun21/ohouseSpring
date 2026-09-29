@@ -766,14 +766,18 @@
     </div>
 </div>
 <script>
-    document.querySelectorAll(".order-item").forEach(function (orderItem) {
-        orderItem.addEventListener("click", function () {
+    document.querySelectorAll(".order-header").forEach(function (header) {
+        header.addEventListener("click", function () {
 
+            const orderItem = header.closest(".order-item");
             const details = orderItem.querySelector(".order-details");
-            const arrow = orderItem.querySelector(".arrow");
+            const arrow = header.querySelector(".arrow");
 
             const isOpen = details.classList.toggle("open");
-            arrow.textContent = isOpen ? "▲" : "▼";
+
+            if (arrow) {
+                arrow.textContent = isOpen ? "▲" : "▼";
+            }
         });
     });
     document.querySelectorAll(".confirm-btn").forEach(function (button) {
