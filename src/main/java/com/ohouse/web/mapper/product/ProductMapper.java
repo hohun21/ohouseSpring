@@ -24,5 +24,6 @@ public interface ProductMapper {
 
     List<CategoryDTO> viewCategory(long category_id) throws SQLException;
 
-    List<ProductDTO> viewProductByCategories(List<Integer> categoryIds, String sort ) throws SQLException;
+    List<ProductDTO> viewProductByCategories(
+            @Param("categoryIds") List<Integer> categoryIds, @Param("sort") String sort ) throws SQLException;
 }

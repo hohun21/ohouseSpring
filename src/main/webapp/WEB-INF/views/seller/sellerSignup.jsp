@@ -479,7 +479,7 @@ $(function () {
             stateKey: "email",
             value: getEmail,
             validate: function () { return EMAIL_ID_PATTERN.test(emailId) && emailDomain !== ""; },
-            url: "/emailcheck.ajax",
+            url: "/seller/emailcheck.ajax",
             parameter: "email",
             messageSelector: "#emailMessage",
             invalidMessage: "올바른 이메일을 입력해 주세요.",
@@ -570,7 +570,7 @@ $(function () {
     }).on("blur", function () {
         requestDuplicateCheck({
             stateKey: "brandName", value: () => $.trim($(this).val()), validate: v => v.length >= 2,
-            url: "/brandnamecheck.ajax", parameter: "brandName", messageSelector: "#brandNameMessage",
+            url: "/seller/brandnamecheck.ajax", parameter: "brandName", messageSelector: "#brandNameMessage",
             invalidMessage: "상호를 2자 이상 입력해 주세요.", successMessage: "사용 가능한 상호입니다.",
             duplicateMessage: "이미 등록된 상호입니다."
         });
@@ -582,7 +582,7 @@ $(function () {
     }).on("blur", function () {
         requestDuplicateCheck({
             stateKey: "mailOrderNumber", value: () => $.trim($(this).val()), validate: v => MAIL_ORDER_PATTERN.test(v),
-            url: "/mailordernumbercheck.ajax", parameter: "mailOrderNumber", messageSelector: "#mailOrderNumberMessage",
+            url: "/seller/mailordernumbercheck.ajax", parameter: "mailOrderNumber", messageSelector: "#mailOrderNumberMessage",
             invalidMessage: "예: 2026-서울강남-1234 형식으로 입력해 주세요.", successMessage: "사용 가능한 신고번호입니다.",
             duplicateMessage: "이미 등록된 통신판매업 신고번호입니다."
         });
@@ -608,7 +608,7 @@ $(function () {
 
         requestDuplicateCheck({
             stateKey: "businessNumber", value: () => businessNumber, validate: v => /^\d{10}$/.test(v),
-            url: "/businessnumbercheck.ajax", parameter: "businessNumber", messageSelector: "#businessNumberMessage",
+            url: "/seller/businessnumbercheck.ajax", parameter: "businessNumber", messageSelector: "#businessNumberMessage",
             invalidMessage: "사업자 등록번호 10자리를 입력해 주세요.", successMessage: "사용 가능한 사업자 등록번호입니다.",
             duplicateMessage: "이미 등록된 사업자 등록번호입니다."
         });

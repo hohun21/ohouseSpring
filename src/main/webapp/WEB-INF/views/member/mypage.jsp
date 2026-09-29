@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -71,7 +72,7 @@
 
 <div class="top-nav">
     <a href="${pageContext.request.contextPath}/member/myPage.htm" class="active">프로필</a>
-	<a href="${pageContext.request.contextPath}/member/myShopping.htm">나의 쇼핑</a>
+    <a href="${pageContext.request.contextPath}/member/myShopping.htm">나의 쇼핑</a>
     <a href="${pageContext.request.contextPath}/member/myReview.htm">나의 리뷰</a>
     <a href="${pageContext.request.contextPath}/changePwd.htm" >설정</a>
 </div>
@@ -95,20 +96,26 @@
                 :-)
             </div>
             
-            <c:if test="${not empty sessionScope.authUser and sessionScope.authUser.role == 'ADMIN'}">
+            <!-- 1. 관리자 권한 배지 및 이름 -->
+            <sec:authorize access="hasRole('ROLE_ADMIN')">
                 <span class="role-badge badge-admin">관리자</span>
-            </c:if>
-            <c:if test="${not empty sessionScope.sellerAuth}">
-                <span class="role-badge badge-seller">판매자</span>
-            </c:if>
+                <div class="profile-name">관리자</div>
+            </sec:authorize>
             
-            <div class="profile-name">
-                <c:choose>
-                    <c:when test="${not empty sessionScope.authUser}">${sessionScope.authUser.name}</c:when>
-                    <c:when test="${not empty sessionScope.sellerAuth}">${sessionScope.sellerAuth.brandName}</c:when>
-                    <c:otherwise>default</c:otherwise>
-                </c:choose>
-            </div>
+            <!-- 2. 판매자 권한 배지 및 브랜드명 -->
+            <sec:authorize access="hasRole('ROLE_SELLER')">
+                <span class="role-badge badge-seller">판매자</span>
+                <div class="profile-name">
+                    <sec:authentication property="principal.brandName" />
+                </div>
+            </sec:authorize>
+            
+            <!-- 3. 일반 회원 권한 이름 -->
+            <sec:authorize access="!hasRole('ROLE_ADMIN') and !hasRole('ROLE_SELLER')">
+                <div class="profile-name">
+                    <sec:authentication property="principal.name" />
+                </div>
+            </sec:authorize>
             
             <div class="profile-stats">팔로워 0 | 오감지수 0</div>
             <a href="${pageContext.request.contextPath}/changePwd.htm" class="profile-setting-btn">설정</a>
@@ -119,25 +126,24 @@
                 <div class="summary-item">내 쿠폰<span>0</span></div>
             </div>
 
-            <c:choose>
-                <c:when test="${not empty sessionScope.authUser and sessionScope.authUser.role == 'ADMIN'}">
-                    <a href="${pageContext.request.contextPath}/admin/dashboard.htm" class="dashboard-btn">
-                        활동 대시보드
-                    </a>
-                </c:when>
-                
-                <c:when test="${not empty sessionScope.sellerAuth}">
-                    <a href="${pageContext.request.contextPath}/seller/dashboard.htm" class="dashboard-btn">
-                        활동 대시보드
-                    </a>
-                </c:when>
-                
-                <c:otherwise>
-                    <button type="button" class="dashboard-btn" onclick="alert('일반 회원용 대시보드는 준비 중입니다.');" style="color: #888;">
-                        활동 대시보드
-                    </button>
-                </c:otherwise>
-            </c:choose>
+            <!-- 권한별 활동 대시보드 버튼 분기 -->
+            <sec:authorize access="hasRole('ROLE_ADMIN')">
+                <a href="${pageContext.request.contextPath}/admin/dashboard.htm" class="dashboard-btn">
+                    활동 대시보드
+                </a>
+            </sec:authorize>
+            
+            <sec:authorize access="hasRole('ROLE_SELLER')">
+                <a href="${pageContext.request.contextPath}/seller/dashboard.htm" class="dashboard-btn">
+                    활동 대시보드
+                </a>
+            </sec:authorize>
+            
+            <sec:authorize access="!hasRole('ROLE_ADMIN') and !hasRole('ROLE_SELLER')">
+                <button type="button" class="dashboard-btn" onclick="alert('일반 회원용 대시보드는 준비 중입니다.');" style="color: #888;">
+                    활동 대시보드
+                </button>
+            </sec:authorize>
 
         </div>
     </div>

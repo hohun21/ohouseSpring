@@ -1,4 +1,6 @@
-package com.ohouse.web.domain.seller;
+package com.ohouse.web.domain.auth;
+
+import java.io.Serializable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SellerAuthDTO {
+public class SellerAuthDTO implements Serializable{
+	private static final long serialVersionUID = 1L;
     private int sellerId;
     private String email;
     private String businessNumber;

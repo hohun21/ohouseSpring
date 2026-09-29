@@ -7,6 +7,7 @@ import com.ohouse.web.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +28,11 @@ public class CartController {
 
     @GetMapping("/cart.htm")
     public String getCart(
-            // @RequestParam("member_id") int member_id,
+            @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id,
             Model model) throws SQLException, NamingException {
-        int memberId = 4; // 임시
 
-        int cart_id = this.cartService.findCartID(memberId);
+
+        int cart_id = this.cartService.findCartID(member_id);
 
         List<CartItemDTO> cdto = this.cartService.selectCartList(cart_id);
 
@@ -41,22 +42,21 @@ public class CartController {
 
     @PostMapping("/cartAdd.htm")
     @ResponseStatus(HttpStatus.OK)
-    public void cartAdd(@RequestBody List<CartItemDTO> cartItemDTOList) throws SQLException, NamingException {
+    public void cartAdd(@RequestBody List<CartItemDTO> cartItemDTOList,
+                        @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id)
+            throws SQLException, NamingException {
 
-        int memberId = 4;
-
-        int cart_id = this.cartService.findCartID(memberId);
-
+        int cart_id = this.cartService.findCartID(member_id);
         cartService.insert(cartItemDTOList, cart_id);
     }
 
     @PostMapping("/cartQuantityEdit.htm")
     @ResponseStatus(HttpStatus.OK)
-    public void cartQuantityEdit(@RequestBody CartItemDTO cartItemDTO) throws SQLException, NamingException {
+    public void cartQuantityEdit(@RequestBody CartItemDTO cartItemDTO,
+                                 @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id)
+            throws SQLException, NamingException {
 
-        int memberId = 4;
-
-        int cart_id = cartService.findCartID(memberId);
+        int cart_id = cartService.findCartID(member_id);
 
         cartService.updateCartQuantity(cartItemDTO, cart_id);
     }
@@ -64,17 +64,19 @@ public class CartController {
     @PostMapping("/cartOptionEdit.htm")
     @ResponseStatus(HttpStatus.OK)
     public void cartOptionEdit(
-            @RequestBody CartOptionEditRequestDTO requestDTO
+            @RequestBody CartOptionEditRequestDTO requestDTO,
+            @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id
     ) throws Exception {
 
-        int memberId = 4; // 임시
-        cartService.updateCartOption(memberId,requestDTO);
+        cartService.updateCartOption(member_id,requestDTO);
     }
 
     @PostMapping("/cartDelete.htm")
-    public ResponseEntity<String> cartDelete(@RequestBody List<Integer> cartItemsIds) throws Exception {
-        int memberId = 4;
-        int cart_id = this.cartService.findCartID(memberId);
+    public ResponseEntity<String> cartDelete(@RequestBody List<Integer> cartItemsIds,
+                                             @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id)
+            throws Exception {
+
+        int cart_id = this.cartService.findCartID(member_id);
 
         int result = this.cartService.deleteCartItems(cart_id, cartItemsIds);
         return ResponseEntity.ok(String.valueOf(result));

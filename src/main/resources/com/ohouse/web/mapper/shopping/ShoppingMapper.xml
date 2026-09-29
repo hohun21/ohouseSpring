@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ohouse.web.mapper.shopping.FeaturedProductMapper">
-  <resultMap id="productMap" type="com.ohouse.web.domain.shopping.ListingProduct">
+
+<mapper namespace="com.ohouse.web.mapper.shopping.ShoppingMapper">
+
+  <resultMap id="productMap" type="com.ohouse.web.domain.shopping.ShoppingProductListDTO">
     <id property="productId" column="product_id"/>
     <result property="rank" column="rank"/>
     <result property="brandName" column="brand_name"/>
@@ -12,17 +14,19 @@
     <result property="imageUrl" column="image_url"/>
     <result property="salesQty" column="sales_quantity"/>
   </resultMap>
+  
   <sql id="reviews">
     review_score AS (SELECT product_id, ROUND(AVG(rating), 1) review_score, COUNT(*) review_count
                      FROM review GROUP BY product_id),
     main_image AS (SELECT product_id, MAX(image_url) image_url FROM product_image
                    WHERE image_type = 'THUMBNAIL' GROUP BY product_id)
   </sql>
+  
   <select id="bestProducts" resultMap="productMap">
     WITH sales AS (SELECT po.product_id, SUM(od.quantity) sales_quantity
                    FROM orders_detail od JOIN product_option po ON po.product_option_id = od.product_option_id
                    WHERE od.delivery_status = '5' GROUP BY po.product_id),
-         <include refid="reviews"/>
+    <include refid="reviews"/>
     SELECT ROW_NUMBER() OVER (ORDER BY s.sales_quantity DESC, p.product_id) rank,
            p.product_id, b.brand_name, p.product_name, p.discount_rate, p.price,
            NVL(rs.review_score, 0) review_score, NVL(rs.review_count, 0) review_count,
@@ -35,6 +39,7 @@
     ORDER BY s.sales_quantity DESC, p.product_id
     FETCH FIRST 100 ROWS ONLY
   </select>
+  
   <select id="onlyProducts" resultMap="productMap">
     WITH <include refid="reviews"/>
     SELECT p.product_id, b.brand_name, p.product_name, p.price, p.created, p.discount_rate,
@@ -45,4 +50,5 @@
     WHERE p.product_name LIKE '[오늘의집 단독]%' AND p.status = 'ACTIVE'
     ORDER BY p.created DESC
   </select>
+  
 </mapper>

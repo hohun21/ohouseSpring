@@ -22,8 +22,11 @@
                 <path fill="#1496f4" d="M75.001 1.243a20.72 20.72 0 0 0-14.136 0c-8.591 3.093-36.22 21.208-51.007 36.46C1.88 45.928 0 51.618 0 61.48v5.078c.126 15.644.914 34.269 3.675 43.324 4.773 15.652 11.949 25.984 57.295 25.984h13.926c45.345 0 52.521-10.332 57.295-25.984 2.761-9.055 3.549-27.68 3.675-43.325v-5.078c0-9.861-1.882-15.551-9.858-23.777-14.789-15.25-42.414-33.366-51.007-36.459" />
             </svg>
         </a>
-
-        <c:if test="${passwordChanged}"><p>비밀번호가 변경되었습니다. 다시 로그인해주세요.</p></c:if>
+		<c:if test="${passwordChanged}">
+		    <script>
+		        alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
+		    </script>
+		</c:if>
         <form id="loginForm" action="${pageContext.request.contextPath}/auth/login" method="post">
             <div class="input-group">
             	<input type="text" id="id" name="username" placeholder="아이디" required>

@@ -144,7 +144,7 @@ public class AdminController {
         return "admin/pending_seller_list";
     }
 
-    @GetMapping("/approveSeller.htm")
+    @PostMapping("/approveSeller.htm")
     public String approveSeller(
             @RequestParam("sellerId") int sellerId,
             @RequestParam("action") String action
@@ -207,7 +207,7 @@ public class AdminController {
         return "admin/settlement_list";
     }
 
-    @GetMapping("/executeSettlement.htm")
+    @GetMapping(value = "/executeSettlement.htm", produces = "text/html; charset=UTF-8")
     @ResponseBody
     public String executeSettlement(@RequestParam("orderDetailId") int orderDetailId) {
         boolean success = settlementService.executeSettlement(orderDetailId);

@@ -1,55 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:beans="http://www.springframework.org/schema/beans"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd" >
-	
-	<mvc:annotation-driven>
+
+   xmlns:mvc="http://www.springframework.org/schema/mvc"
+   xmlns:context="http://www.springframework.org/schema/context"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:aop="http://www.springframework.org/schema/aop"
+   xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd" >
+   
+   <mvc:annotation-driven>
       <mvc:argument-resolvers>
-         <bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver"/>
+         <bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver" />
       </mvc:argument-resolvers>
+      
+      <mvc:message-converters register-defaults="true">
+         <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
+      </mvc:message-converters>
+
    </mvc:annotation-driven>
-	
-	
-	<context:component-scan base-package="com.ohouse.web" use-default-filters="false">
-	    <context:include-filter
-	        type="annotation"
-	        expression="org.springframework.stereotype.Controller" />
-	    <context:exclude-filter
-	        type="annotation"
-	        expression="org.springframework.stereotype.Service" />
-	</context:component-scan>
-	
-	<bean
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix" value="/WEB-INF/views/" />
-		<property name="suffix" value=".jsp" />
-	</bean>
-	
-	<mvc:resources mapping="/resources/**" location="/resources/" />
-	
-	<mvc:resources mapping="/images/**" location="/images/" />
-	
-	<!-- Tiles -->
-	<beans:bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
-		<beans:property name="definitions">
-			<beans:list>
-				<beans:value>/WEB-INF/tiles/tiles.xml</beans:value>
-			</beans:list>
-		</beans:property>
-	</beans:bean>
-	<beans:bean id="tilesViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		<beans:property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView"/>
-		<beans:property name="order" value="1"/>
-	</beans:bean>
-	
-	<!-- 파일 업로드 (회원님이 추가했던 설정) -->
-	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-	</beans:bean>
+   
+   <context:component-scan base-package="com.ohouse.web" use-default-filters="false">
+       <context:include-filter
+           type="annotation"
+           expression="org.springframework.stereotype.Controller" />
+       <context:exclude-filter
+           type="annotation"
+           expression="org.springframework.stereotype.Service" />
+   </context:component-scan>
+   
+   <bean
+      class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+      <property name="prefix" value="/WEB-INF/views/" />
+      <property name="suffix" value=".jsp" />
+   </bean>
+   
+   <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+      <property name="maxUploadSize" value="52428800" />
+      <property name="defaultEncoding" value="utf-8" />
+   </bean>
+   
+   <mvc:resources mapping="/resources/**" location="/resources/" />
+   
+   <mvc:resources mapping="/images/**" location="/images/" />
+
 
 </beans>
