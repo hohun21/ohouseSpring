@@ -1,18 +1,22 @@
 package com.ohouse.web.controller.shopping.category;
 
-import com.ohouse.web.domain.shopping.category.CategoryDTO;
-import com.ohouse.web.service.product.ProductService;
-import com.ohouse.web.service.shopping.category.CategoryService;
-import lombok.RequiredArgsConstructor;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import com.ohouse.web.domain.product.ProductDTO;
+import com.ohouse.web.domain.shopping.category.CategoryDTO;
+import com.ohouse.web.service.product.ProductService;
+import com.ohouse.web.service.shopping.ShoppingService;
+import com.ohouse.web.service.shopping.category.CategoryService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class CategoryController {
 
 	private final CategoryService categoryService;
 	private final ProductService productService;
+	private final ShoppingService shoppingService;
 	
 	@GetMapping("/category.htm")
 	public String category(
@@ -70,14 +75,18 @@ public class CategoryController {
 		for (CategoryDTO category : leafCategories) {
 			categoryIds.add(category.getCategory_id());
 		} // for
-		
-		// ProductService에 구현필요
-		// List<ProductDTO> products = productService.getProductListByCategories(categoryIds, sort);
-		
-		// List<ProductDTO>, List<OnlyDTO> List<ProductDTO>
-		List<?> products = this.productService.getProductListByCategories(categoryIds, sort);
-		List<?> onlyProducts = new ArrayList<>();
-		List<?> bannerProducts = new ArrayList<>();
+				
+		List<ProductDTO> products = this.productService.getProductListByCategories(categoryIds, sort);
+		List<ProductDTO> bannerProducts = products.size() > 2 ? products.subList(2, Math.min(5, products.size())) : new ArrayList<>();
+		List<ProductDTO> onlyProducts = new ArrayList<>();
+
+		if (isOnly) {
+			for (ProductDTO product :products) {
+				if (product.getProduct_name().startsWith("[오늘의집 단독]")) {
+					onlyProducts.add(product);
+				}
+			}
+		}
 		
 		model.addAttribute("activeMenu", "category");
 		model.addAttribute("categories", categories);
@@ -85,7 +94,7 @@ public class CategoryController {
 		model.addAttribute("products", products);
 		model.addAttribute("selectedCategoryId", selectedCategoryId);
 		model.addAttribute("bannerProducts", bannerProducts);		
-		model.addAttribute("OnlyProducts", onlyProducts);		
+		model.addAttribute("onlyProducts", onlyProducts);		
 		model.addAttribute("isOnly", isOnly);
 		model.addAttribute("mainCategoryName", mainCategoryName);
 		model.addAttribute("mainCategoryId", mainCategory != null ? mainCategory.getCategory_id() : null);
