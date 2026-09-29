@@ -1,11 +1,22 @@
 package com.ohouse.web.controller.product;
 
 
+import java.security.Principal;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ohouse.member.dto.AuthUserDTO;
-import com.ohouse.web.domain.auth.AuthUser;
-import com.ohouse.web.domain.member.MemberVO;
 import com.ohouse.web.domain.product.ProductDetailDTO;
 import com.ohouse.web.domain.product.ProductOptionDTO;
 import com.ohouse.web.domain.product.review.OptionFilterDTO;
@@ -19,21 +30,6 @@ import com.ohouse.web.service.product.ReviewService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.security.Principal;
-import java.sql.SQLException;
-import java.util.List;
 
 @Controller
 @RequestMapping(value="/product")
