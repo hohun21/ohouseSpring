@@ -83,7 +83,7 @@ public class SellerAuthController {
 
 			session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
 			
-			return "redirect:/seller/sellerSignupStatus.htm";
+			return "redirect:/main.htm";
 
 		} catch (IllegalArgumentException | IllegalStateException e) {
 			model.addAttribute("email", email);
