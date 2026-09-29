@@ -31,6 +31,7 @@ import com.ohouse.web.service.product.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 
+
 @Controller
 @RequestMapping(value="/product")
 @RequiredArgsConstructor
@@ -106,6 +107,7 @@ public class ProductController {
 			@RequestParam("option_value_ids") List<Long> option_value_ids
 			) throws SQLException, JsonProcessingException {
 
+
 		ProductOptionDTO result =
 				productService.productOption(product_id, option_value_ids);
 
@@ -123,17 +125,11 @@ public class ProductController {
 		System.out.println(json);
 		System.out.println("========================================");
 
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.parseMediaType("text/plain;charset=UTF-8"))
+                .body(json);
+    }
 
-
-
-
-
-
-
-		return ResponseEntity
-				.ok()
-				.contentType(MediaType.parseMediaType("application/json;charset=UTF-8"))
-				.body(json);
-	}
 
 }

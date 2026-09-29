@@ -81,7 +81,7 @@
 
     <!-- viewMyOrder -->
     <select id="viewMyOrder" resultType="com.ohouse.web.domain.member.MyOrderDTO">
-        SELECT ORDER_ID as orders_id,ORDER_NAME,PAYMENT_PRICE,ORDER_DATE
+        SELECT ORDER_ID as orders_id,ORDER_NAME,PAYMENT_PRICE,ORDER_DATE,TOTAL_PRICE
         ,REQUEST_MSG FROM ORDERS
         WHERE MEMBER_ID = #{member_id}
     </select>
@@ -99,5 +99,65 @@
         FROM ORDERS_DETAIL od JOIN BRAND b ON od.brand_id = b.brand_id
         JOIN PRODUCT p ON od.PRODUCT_NAME = p.PRODUCT_NAME
         WHERE od.ORDER_ID = #{order_id}
+    </select>
+    <!--OrderStatusCountDTO getOrderStatusCount(int member_id)-->
+    <select id="getOrderStatusCount"
+            resultType="com.ohouse.web.domain.order.OrderStatusCountDTO">
+
+        SELECT
+        NVL(SUM(CASE WHEN od.DELIVERY_STATUS = 1 THEN 1 ELSE 0 END), 0) AS paymentCount,
+        NVL(SUM(CASE WHEN od.DELIVERY_STATUS = 2 THEN 1 ELSE 0 END), 0) AS preparingCount,
+        NVL(SUM(CASE WHEN od.DELIVERY_STATUS = 3 THEN 1 ELSE 0 END), 0) AS shippingCount,
+        NVL(SUM(CASE WHEN od.DELIVERY_STATUS = 4 THEN 1 ELSE 0 END), 0) AS deliveredCount,
+        NVL(SUM(CASE WHEN od.DELIVERY_STATUS IN (5, 12) THEN 1 ELSE 0 END), 0) AS confirmedCount
+        FROM ORDERS_DETAIL od
+        JOIN ORDERS o ON od.ORDER_ID = o.ORDER_ID
+        WHERE o.MEMBER_ID = #{member_id}
+
+    </select>
+
+    <!--payConfirm-->
+    <update id="payConfirm">
+        UPDATE ORDERS_DETAIL
+        SET DELIVERY_STATUS = 5 , PURCHASE_CONFIRMED_DATE = SYSDATE
+        WHERE ORDERS_DETAIL_ID = #{orders_detail_id}
+    </update>
+
+    <!-- payCancel -->
+    <update id="payCancel">
+        UPDATE ORDERS_DETAIL
+        SET DELIVERY_STATUS = 10
+        WHERE ORDERS_DETAIL_ID = #{orders_detail_id}
+    </update>
+
+    <!-- payReturn -->
+    <update id="payReturn">
+        UPDATE ORDERS_DETAIL
+        SET DELIVERY_STATUS = 6
+        WHERE ORDERS_DETAIL_ID = #{orders_detail_id}
+    </update>
+    <!-- myCouponlist -->
+    <select id="myCouponlist" resultType="com.ohouse.web.domain.member.CouponDTO">
+        SELECT c.coupon_name
+        ,c.discount_type
+        ,c.discount_value
+        ,c.min_order_price
+        ,c.max_discount
+        ,c.start_date
+        ,c.end_date
+        ,mc.member_coupon_id
+        ,mc.issued_date
+        ,mc.used_date
+        ,mc.status
+        FROM coupon c
+        JOIN member_coupon mc
+        ON c.coupon_id = mc.coupon_id
+        WHERE mc.member_id = #{member_id}
+    </select>
+    <!-- getCouponCount -->
+    <select id="getCouponCount" resultType="int">
+        SELECT COUNT(*)
+        FROM MEMBER_COUPON
+        WHERE MEMBER_ID = #{member_id}
     </select>
 </mapper>

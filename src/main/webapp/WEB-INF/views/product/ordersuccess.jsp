@@ -20,7 +20,7 @@
                 홈으로 가기
             </a>
 
-            <a href="${pageContext.request.contextPath}/order/list.htm"
+            <a href="${pageContext.request.contextPath}/member/myshopping.htm"
                class="btn-order">
                 주문내역 확인
             </a>

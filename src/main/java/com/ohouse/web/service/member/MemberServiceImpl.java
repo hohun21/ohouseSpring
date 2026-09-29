@@ -1,11 +1,13 @@
 package com.ohouse.web.service.member;
 
+import com.ohouse.web.domain.member.CouponDTO;
 import com.ohouse.web.domain.member.MyOrderDTO;
 import com.ohouse.web.domain.member.MyOrderDetailDTO;
 import com.ohouse.web.mapper.order.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @Service
@@ -23,5 +25,9 @@ public class MemberServiceImpl implements MemberService {
         return list;
     }
 
-
+    @Override
+    public List<CouponDTO> selectCoupon(int member_id) throws SQLException {
+        List<CouponDTO> clist = this.orderMapper.myCouponlist(member_id);
+        return clist;
+    }
 }
