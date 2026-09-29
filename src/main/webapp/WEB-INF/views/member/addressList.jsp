@@ -116,7 +116,7 @@
                 <button type="button" class="btn-list" id="btnShowList">목록 보기</button>
             </div>
 
-            <form action="${pageContext.request.contextPath}/addressAddPro.htm" method="post" id="addressForm">
+            <form action="${pageContext.request.contextPath}/member/addAddress.htm" method="post" id="addressForm">
                 <div class="form-group">
                     <label for="address_name">배송지명</label>
                     <input type="text" id="address_name" name="address_name" class="input-box" placeholder="예) 집, 회사">
@@ -194,9 +194,10 @@
                                 </div>
                                 <div class="item-footer">
                                     <c:if test="${addr.is_default == 'N'}">
-                                        <button type="button" class="btn-item" onclick="location.href='${pageContext.request.contextPath}/addressSetDefault.htm?address_id=${addr.address_id}'">기본배송지로 설정</button>
+                               
+                                        <button type="button" class="btn-item" onclick="location.href='${pageContext.request.contextPath}/member/setDefaultAddress.htm?address_id=${addr.address_id}'">기본배송지로 설정</button>
                                     </c:if>
-                                    <button type="button" class="btn-item" onclick="if(confirm('정말 삭제하시겠습니까?')) location.href='${pageContext.request.contextPath}/addressDelete.htm?address_id=${addr.address_id}'">삭제</button>
+                                    <button type="button" class="btn-item" onclick="if(confirm('정말 삭제하시겠습니까?')) location.href='${pageContext.request.contextPath}/member/deleteAddress.htm?address_id=${addr.address_id}'">삭제</button>
                                 </div>
                             </div>
                         </c:forEach>
