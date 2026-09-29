@@ -654,7 +654,7 @@
             사용자 숨기기 설정
         </a>
 
-        <a href="${pageContext.request.contextPath}/addressList.htm">
+        <a href="${pageContext.request.contextPath}/member/addressList.htm">
             배송지 설정
         </a>
 
