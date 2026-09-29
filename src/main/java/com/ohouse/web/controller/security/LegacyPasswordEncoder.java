@@ -1,4 +1,4 @@
-package com.ohouse.web.security;
+package com.ohouse.web.controller.security;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

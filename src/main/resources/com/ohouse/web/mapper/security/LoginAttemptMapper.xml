@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ohouse.web.mapper.security.LoginAttemptMapper">
+
+	<select id="existsActiveLock" resultType="int">
+		SELECT COUNT(*)
+		FROM MEMBER_LOGIN_FAILURE
+		WHERE LOGIN_ID = #{loginId} AND LOCKED_UNTIL > SYSTIMESTAMP
+	</select>
+
+	<insert id="insertFailure">
+		INSERT INTO MEMBER_LOGIN_FAILURE (
+			FAILURE_ID, LOGIN_ID, IP_ADDRESS, FAILED_AT
+		) VALUES (
+			SEQ_MEMBER_LOGIN_FAILURE.NEXTVAL, #{loginId}, #{ipAddress}, SYSTIMESTAMP
+		)
+	</insert>
+
+	<select id="countRecentFailures" resultType="int">
+		SELECT COUNT(*)
+		FROM MEMBER_LOGIN_FAILURE
+		WHERE LOGIN_ID = #{loginId} AND FAILED_AT >= SYSTIMESTAMP - INTERVAL '1' DAY
+	</select>
+
+	<update id="setLockedUntilLatestFailure">
+		UPDATE MEMBER_LOGIN_FAILURE
+		SET LOCKED_UNTIL = SYSTIMESTAMP + INTERVAL '10' MINUTE
+		WHERE FAILURE_ID = (
+								SELECT MAX(FAILURE_ID)
+								FROM MEMBER_LOGIN_FAILURE
+								WHERE LOGIN_ID = #{loginId}
+							)
+	</update>
+
+	<delete id="deleteFailuresByLoginId">
+		DELETE FROM MEMBER_LOGIN_FAILURE
+		WHERE LOGIN_ID = #{loginId}
+	</delete>
+
+	<delete id="deleteExpiredFailures">
+		DELETE FROM MEMBER_LOGIN_FAILURE
+		WHERE FAILED_AT &lt; SYSTIMESTAMP - INTERVAL '1' DAY
+	</delete>
+
+</mapper>

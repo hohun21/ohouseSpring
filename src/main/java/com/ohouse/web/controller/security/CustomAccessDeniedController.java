@@ -1,4 +1,4 @@
-package com.ohouse.web.security;
+package com.ohouse.web.controller.security;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ import lombok.extern.log4j.Log4j;
 
 @Component
 @Log4j
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+public class CustomAccessDeniedController implements AccessDeniedHandler {
 
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response,

@@ -1,4 +1,4 @@
-package com.ohouse.web.security;
+package com.ohouse.web.controller.security;
 
 import java.util.Arrays;
 import java.util.HashSet;

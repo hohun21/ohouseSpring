@@ -14,43 +14,44 @@ import java.util.stream.Collectors;
 @Log4j
 public class CustomerUser extends User {
 
-    private MemberVO member_vo;
+	private MemberVO member_vo;
 
 
-    public CustomerUser(
+	public CustomerUser(
 			String username
-            , String password
-            , boolean enabled
-            , boolean accountNonExpired
-            , boolean credentialsNonExpired
-            , boolean accountNonLocked
-            , Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
+			, String password
+			, boolean enabled
+			, boolean accountNonExpired
+			, boolean credentialsNonExpired
+			, boolean accountNonLocked
+			, Collection<? extends GrantedAuthority> authorities) {
+		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 
-        log.info("❤️ CustomUserDetailsService.loadUserByUsername...");
-    }
+		log.info("❤️ CustomUserDetailsService.loadUserByUsername...");
+	}
 
 	public CustomerUser(MemberVO memberVO) {
 
-	    super(
-	    	memberVO.getId(),
-	        memberVO.getPassword(),
-	        memberVO.getStatus() == 1, // enabled
-	        true,                      // accountNonExpired
-	        true,                      // credentialsNonExpired
-	        true,                      // accountNonLocked
-	        (memberVO.getAuthList() == null ? java.util.Collections.<com.ohouse.web.domain.auth.AuthoritiesVO>emptyList() : memberVO.getAuthList()).stream()
-	            .map(auth -> new SimpleGrantedAuthority(auth.getAuthority()))
-	            .collect(Collectors.toList())
-	    );
-
+		super(
+				memberVO.getId(),
+				memberVO.getPassword(),
+				true,  // enabled: 상태 검사는 Provider에서 비밀번호 확인 후 수행
+				true,
+				true,
+				true,
+				(memberVO.getAuthList() == null
+				? java.util.Collections.<com.ohouse.web.domain.auth.AuthoritiesVO>emptyList()
+						: memberVO.getAuthList()).stream()
+				.map(auth -> new SimpleGrantedAuthority(auth.getAuthority()))
+				.collect(Collectors.toList())
+				);
 
 		this.member_vo = memberVO;
 
 		log.info("CustomerUser authenticated: " + memberVO.getId());
 	}
 
-	
+
 	public String getName() {
 		return member_vo != null ? member_vo.getName() : null;
 	}

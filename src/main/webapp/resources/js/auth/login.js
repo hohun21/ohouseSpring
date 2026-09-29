@@ -9,36 +9,31 @@
         }
 
         $("#loginForm").on("submit", function (event) {
-            event.preventDefault();
-            const form = this;
-            const id = $.trim($("#id").val());
-            if (!id) {
-                window.alert("아이디를 입력해주세요.");
-                $("#id").trigger("focus");
-                return;
-            }
+		    const $id = $("#id");
+		    const $password = $("#password");
+		
+		    const idEmpty = !$.trim($id.val());
+		    const passwordEmpty = !$.trim($password.val());
+		
+		    $id.toggleClass("input-error", idEmpty);
+		    $password.toggleClass("input-error", passwordEmpty);
+		
+		    if (idEmpty || passwordEmpty) {
+		        event.preventDefault();
+		
+		        if (idEmpty) {
+		            $id.trigger("focus");
+		        } else {
+		            $password.trigger("focus");
+		        }
+		    }
+		});
 
-            $.ajax({
-                url: contextPath + "/auth/statusCheck.ajax",
-                type: "GET",
-                dataType: "json",
-                data: { id: id }
-            }).done(function (result) {
-                if (result.code === "WITHDRAWN") {
-                    window.alert("탈퇴한 회원입니다.");
-                } else if (result.code === "STOP") {
-                    window.alert("정지된 회원입니다.");
-                } else if (result.code === "NOT_FOUND") {
-                    window.alert("등록되지 않은 아이디입니다.");
-                } else if (result.code === "ACTIVE") {
-                    form.submit();
-                } else {
-                    window.alert("회원 상태를 확인할 수 없습니다.");
-                }
-            }).fail(function (xhr) {
-                console.error("회원 상태 확인 실패:", xhr.status, xhr.responseText);
-                window.alert("서버 통신 중 오류가 발생했습니다.");
-            });
-        });
+		// 입력을 시작하면 해당 칸의 빨간 테두리 제거
+		$("#id, #password").on("input", function () {
+		    if ($.trim($(this).val())) {
+		        $(this).removeClass("input-error");
+		    }
+		});
     });
 })(jQuery);

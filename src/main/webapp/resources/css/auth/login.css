@@ -12,6 +12,7 @@ form { width: 100%; }
 .input-group input::placeholder { color: #bdbdbd; font-weight: 400; }
 .input-group input:first-child { border-bottom: 1px solid #dadce0; }
 .input-group input:focus { background-color: #fafafa; }
+.input-group input.input-error { box-shadow: inset 0 0 0 1px #ff4d4f; position: relative; z-index: 1; }
 
 .btn-login { width: 100%; padding: 18px; background-color: #1496f4; color: white; border: none; border-radius: 4px; font-size: 18px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
 .btn-login:hover { background-color: #0b80d6; }
@@ -34,6 +35,8 @@ form { width: 100%; }
 .guest-link { font-size: 14px; color: #424242; text-align: center; display: block; cursor: pointer; }
 .guest-link:hover { text-decoration: underline; }
 .copyright { position: absolute; bottom: 30px; font-size: 12px; color: #9e9e9e; text-align: center; width: 100%; }
+
+.login-warning { width: 100%; box-sizing: border-box; margin: 0 0 16px; padding: 14px 16px; border-radius: 8px; background: #222; color: #fff; font-size: 14px; line-height: 1.5; }
 
 .remember-row { display: flex; align-items: center; gap: 8px; margin: -8px 0 20px; font-size: 14px; color: #424242; cursor: pointer; }
 .remember-row input { width: 16px; height: 16px; margin: 0; accent-color: #1496f4; }

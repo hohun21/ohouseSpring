@@ -1,4 +1,4 @@
-package com.ohouse.web.security;
+package com.ohouse.web.controller.security;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j;
 
 @Component
 @Log4j
-public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
+public class CustomLoginSuccessController implements AuthenticationSuccessHandler {
     @Autowired
     private LegacyPasswordUpgradeService passwordUpgradeService;
 

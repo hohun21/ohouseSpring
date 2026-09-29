@@ -1,8 +1,9 @@
 package com.ohouse.web.service.auth;
 
+import com.ohouse.web.controller.security.LegacyPasswordEncoder;
 import com.ohouse.web.domain.member.MemberVO;
 import com.ohouse.web.mapper.auth.MemberAuthMapper;
-import com.ohouse.web.security.LegacyPasswordEncoder;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -3,9 +3,10 @@ package com.ohouse.web.service.auth;
 import java.util.Map;
 
 import com.ohouse.web.mapper.auth.SellerAuthMapper;
+import com.ohouse.web.controller.security.LegacyPasswordEncoder;
 import com.ohouse.web.domain.auth.SellerSignupRequest;
 import com.ohouse.web.domain.seller.SellerDTO;
-import com.ohouse.web.security.LegacyPasswordEncoder;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
