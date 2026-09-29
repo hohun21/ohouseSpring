@@ -112,9 +112,17 @@ function findProductOption() {
                 if (!response.ok) {
                     throw new Error("HTTP " + response.status);
                 }
-                return response.json();
+                return response.text();
             })
             .then(function (data) {
+
+                data = JSON.parse(data);
+                console.log("data =", data);
+                console.log("type =", typeof data);
+                console.log("isArray =", Array.isArray(data));
+                console.log("status =", data.status);
+                console.log("keys =", Object.keys(data));
+
                 if (!data) {
                     showToast("선택한 옵션 조합이 없습니다.");
                     initOptions();

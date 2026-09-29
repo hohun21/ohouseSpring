@@ -59,7 +59,7 @@ public class ProductController {
 
         return ResponseEntity
                 .ok()
-                .contentType(MediaType.parseMediaType("application/json;charset=UTF-8"))
+                .contentType(MediaType.parseMediaType("text/plain;charset=UTF-8"))
                 .body(json);
     }
 

@@ -2,12 +2,14 @@ package com.ohouse.web.service.order;
 
 import com.ohouse.web.domain.order.OrderDetailRequestDTO;
 import com.ohouse.web.domain.order.OrderRequestDTO;
+import com.ohouse.web.domain.order.OrderStatusCountDTO;
 import com.ohouse.web.mapper.cart.CartMapper;
 import com.ohouse.web.mapper.order.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.naming.NamingException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -95,5 +97,30 @@ public class OrderServiceImpl implements OrderService {
 
         // @Transactional이 COMMIT 처리
         return order_id;
+    }
+
+    @Override
+    public OrderStatusCountDTO getOrderStatusCount(int member_id) throws Exception {
+        return this.orderMapper.getOrderStatusCount(member_id);
+    }
+
+    @Override
+    public void payconfirm(int orders_detail_id) throws SQLException, NamingException {
+        this.orderMapper.payConfirm(orders_detail_id);
+    }
+
+    @Override
+    public void paycancel(int orders_detail_id) throws SQLException, NamingException {
+        this.orderMapper.payCancel(orders_detail_id);
+    }
+
+    @Override
+    public void payreturn(int orders_detail_id) throws SQLException, NamingException {
+        this.orderMapper.payReturn(orders_detail_id);
+    }
+
+    @Override
+    public int getCouponCount(int member_id) throws SQLException {
+        return this.orderMapper.getCouponCount(member_id);
     }
 }
