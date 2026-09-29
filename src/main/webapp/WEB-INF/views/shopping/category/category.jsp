@@ -464,19 +464,19 @@
                 <c:forEach var="product" items="${onlyProducts}">
 
     <div class="product-card"
-         onclick="location.href='${pageContext.request.contextPath}/product/productDetail.htm?product_id=${product.productId}'">
+         onclick="location.href='${pageContext.request.contextPath}/product/productDetail.htm?product_id=${product.product_id}'">
 
         <div class="product-img-wrap">
-            <img src="${product.imageUrl}"
-                 alt="${product.productName}">
+            <img src="${product.image_url}"
+                 alt="${product.product_name}">
         </div>
 
         <div class="brand">
-            ${product.brandName}
+            ${product.brand_name}
         </div>
 
         <div class="title">
-            ${fn:replace(product.productName, '[오늘의집 단독]', '')}
+            ${fn:replace(product.product_name, '[오늘의집 단독]', '')}
         </div>
 
         <div class="only-badge">
