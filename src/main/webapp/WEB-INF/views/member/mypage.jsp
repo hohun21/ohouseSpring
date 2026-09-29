@@ -72,8 +72,17 @@
 
 <div class="top-nav">
     <a href="${pageContext.request.contextPath}/member/myPage.htm" class="active">프로필</a>
-    <a href="${pageContext.request.contextPath}/member/myShopping.htm">나의 쇼핑</a>
-    <a href="${pageContext.request.contextPath}/member/myReview.htm">나의 리뷰</a>
+    
+    <sec:authorize access="hasRole('ROLE_SELLER')">
+        <a href="#" onclick="alert('일반 회원만 이용할 수 있는 메뉴입니다.'); return false;">나의 쇼핑</a>
+        <a href="#" onclick="alert('일반 회원만 이용할 수 있는 메뉴입니다.'); return false;">나의 리뷰</a>
+    </sec:authorize>
+    
+    <sec:authorize access="!hasRole('ROLE_SELLER')">
+        <a href="${pageContext.request.contextPath}/member/myShopping.htm">나의 쇼핑</a>
+        <a href="${pageContext.request.contextPath}/member/myReview.htm">나의 리뷰</a>
+    </sec:authorize>
+
     <a href="${pageContext.request.contextPath}/changePwd.htm" >설정</a>
 </div>
 <div class="sub-nav">

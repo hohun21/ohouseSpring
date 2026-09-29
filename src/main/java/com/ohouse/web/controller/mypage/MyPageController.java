@@ -28,16 +28,19 @@ import java.util.List;
 @RequestMapping("/member")
 @RequiredArgsConstructor
 public class MyPageController {
-    
+
     private final MemberService memberService;
-
     private final MemberAuthService memberAuthService;
-    
     private final ReviewService reviewService;
-
-    private final AddressService addressService; // 💡 배송지 서비스 추가
-
+    private final AddressService addressService;
     private final OrderService orderService;
+
+    private Integer getCustomerMemberId(Object principal) {
+        if (principal instanceof CustomerUser) {
+            return ((CustomerUser) principal).getMember_vo().getMemberId();
+        }
+        return null;
+    }
 
     @GetMapping("/myPage.htm")
     public String myPage(@AuthenticationPrincipal Object principal, Model model) {
@@ -48,18 +51,19 @@ public class MyPageController {
     }
 
     @GetMapping("/myShopping.htm")
-    public String myShopping(Model model,
-                          @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) throws Exception {
+    public String myShopping(Model model, @AuthenticationPrincipal Object principal) throws Exception {
+        Integer memberId = getCustomerMemberId(principal);
+        if (memberId == null) return "redirect:/"; // 판매자가 직접 URL 쳤을 때 홈으로 튕겨냄
 
-            List<MyOrderDTO> orderdto = this.memberService.selectorder(member_id);
-            OrderStatusCountDTO ordercount = this.orderService.getOrderStatusCount(member_id);
-            int couponCount = this.orderService.getCouponCount(member_id);
-            model.addAttribute("orderdto",orderdto);
-            model.addAttribute("statusCount",ordercount);
-            model.addAttribute("couponCount",couponCount);
-            return "member/myShopping";
-        }
-
+        List<MyOrderDTO> orderdto = this.memberService.selectorder(memberId);
+        OrderStatusCountDTO ordercount = this.orderService.getOrderStatusCount(memberId);
+        int couponCount = this.orderService.getCouponCount(memberId);
+        
+        model.addAttribute("orderdto", orderdto);
+        model.addAttribute("statusCount", ordercount);
+        model.addAttribute("couponCount", couponCount);
+        return "member/myShopping";
+    }
 
     @GetMapping("/myReview.htm")
     public String myReview(
@@ -69,32 +73,16 @@ public class MyPageController {
             Model model,
             HttpServletRequest request,
             Authentication authentication,
-            @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) throws Exception {
+            @AuthenticationPrincipal Object principal) throws Exception {
 
-		/*
-		 * // 1. 세션에서 로그인 사용자 정보 확인 (기존 핸들러 로직 그대로 반영) AuthUserDTO authUser =
-		 * (AuthUserDTO) session.getAttribute("authUser"); Object sellerAuth =
-		 * session.getAttribute("sellerAuth");
-		 * 
-		 * if (authUser == null && sellerAuth == null) { return "redirect:/login.htm"; }
-		 */
+        Integer memberId = getCustomerMemberId(principal);
+        if (memberId == null) return "redirect:/"; // 판매자 접근 차단
 
-        int memberId = member_id;
         int numberPerPage = 5;
-
-		boolean isAdmin = false;
-
-		if (authentication != null && authentication.getPrincipal() instanceof CustomerUser) {
-		    CustomerUser customerUser = (CustomerUser) authentication.getPrincipal();
-		    memberId = customerUser.getMember_vo().getMemberId();
-		    
-		    isAdmin = authentication.getAuthorities().stream()
-		                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-		                
-		    
-		}
+        boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
         
-        // 2. ReviewPageDTO 빌드 (DTO 수정 없이 필드명 맞춤)
+        // 2. ReviewPageDTO 빌드
         ReviewPageDTO reqDTO = ReviewPageDTO.builder()
                 .memberId(memberId)
                 .sort(sort)
@@ -102,45 +90,48 @@ public class MyPageController {
                 .numberPerPage(numberPerPage)
                 .build();
 
-        // 3. 마이페이지 전용 서비스 메서드 호출 (0건 뜨던 원인 해결)
+        // 3. 마이페이지 전용 서비스 메서드 호출
         int totalRecords = reviewService.selectMyReviewTotalCount(memberId);
         PageDTO pageDTO = new PageDTO(totalRecords, currentPage, numberPerPage);
         List<ReviewDTO> reviewList = reviewService.selectMyReviewList(reqDTO);
 
-        // 4. Model에 데이터 담기 (JSP의 request.setAttribute 대체)
+        // 4. Model에 데이터 담기
         model.addAttribute("reviewList", reviewList);
         model.addAttribute("pageDTO", pageDTO);
         model.addAttribute("currentSort", sort);
         model.addAttribute("isAdmin", isAdmin);
 
-        // 5. AJAX 요청 여부 확인 (파라미터 또는 헤더 체크)
+        // 5. AJAX 요청 여부 확인
         boolean isAjax = "true".equals(ajaxParam) || "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
 
         if (isAjax) {
-            return "member/ajaxMyReview"; // 스프링 뷰 리졸버 설정에 따라 접두사/접미사 자동 붙음 (예: /WEB-INF/views/member/ajaxMyReview.jsp)
+            return "member/ajaxMyReview"; 
         }
 
-        return "member/myReview"; // /WEB-INF/views/member/myReview.jsp
+        return "member/myReview";
     }
 
-
     @GetMapping("/addressList.htm")
-    public String addressList(Model model, 
-                              @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) {
-        
-        List<ShippingAddressDTO> addressList = addressService.getAddressList(member_id);
+    public String addressList(Model model, @AuthenticationPrincipal Object principal) {
+        Integer memberId = getCustomerMemberId(principal);
+        if (memberId == null) return "redirect:/";
+
+        List<ShippingAddressDTO> addressList = addressService.getAddressList(memberId);
         model.addAttribute("addressList", addressList);
         
-        return "member/addressList"; // /WEB-INF/views/member/addressList.jsp 로 포워딩
+        return "member/addressList";
     }
 
     @PostMapping(value = "/addAddress.htm", produces = "text/html; charset=UTF-8")
     @ResponseBody
     public String addAddress(ShippingAddressDTO dto,
-                             @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id,
+                             @AuthenticationPrincipal Object principal,
                              @RequestParam(value = "is_default", required = false) String isDefault) {
         
-        dto.setMember_id(member_id);
+        Integer memberId = getCustomerMemberId(principal);
+        if (memberId == null) return "<script>alert('일반 회원만 이용 가능합니다.'); history.back();</script>";
+
+        dto.setMember_id(memberId);
         dto.setIs_default(isDefault != null ? "Y" : "N");
         
         int result = addressService.addShippingAddress(dto);
@@ -161,9 +152,12 @@ public class MyPageController {
     @RequestMapping(value = "/deleteAddress.htm", produces = "text/html; charset=UTF-8")
     @ResponseBody
     public String deleteAddress(@RequestParam("address_id") int addressId,
-                                @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) {
+                                @AuthenticationPrincipal Object principal) {
         
-        addressService.deleteAddress(addressId, member_id);
+        Integer memberId = getCustomerMemberId(principal);
+        if (memberId == null) return "<script>alert('일반 회원만 이용 가능합니다.'); history.back();</script>";
+
+        addressService.deleteAddress(addressId, memberId);
         
         return "<script>alert('배송지가 삭제되었습니다.'); location.href='addressList.htm?openModal=true';</script>";
     }
@@ -171,20 +165,24 @@ public class MyPageController {
     @RequestMapping(value = "/setDefaultAddress.htm", produces = "text/html; charset=UTF-8")
     @ResponseBody
     public String setDefaultAddress(@RequestParam("address_id") int addressId,
-                                    @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) {
+                                    @AuthenticationPrincipal Object principal) {
         
-        addressService.setDefaultAddress(addressId, member_id);
+        Integer memberId = getCustomerMemberId(principal);
+        if (memberId == null) return "<script>alert('일반 회원만 이용 가능합니다.'); history.back();</script>";
+
+        addressService.setDefaultAddress(addressId, memberId);
         
         return "<script>alert('기본배송지가 변경되었습니다.'); location.href='addressList.htm?openModal=true';</script>";
-
     }
 
     // 쿠폰
     @GetMapping("/couponlist.htm")
-    public String couponlist(Model model,
-                             @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id) throws Exception {
-        List<CouponDTO> clist = this.memberService.selectCoupon(member_id);
-        model.addAttribute("clist",clist);
+    public String couponlist(Model model, @AuthenticationPrincipal Object principal) throws Exception {
+        Integer memberId = getCustomerMemberId(principal);
+        if (memberId == null) return "redirect:/";
+
+        List<CouponDTO> clist = this.memberService.selectCoupon(memberId);
+        model.addAttribute("clist", clist);
         return "member/couponlist";
     }
 
@@ -210,4 +208,5 @@ public class MyPageController {
         return "redirect:/main.htm";
     }
 
+	
 }
