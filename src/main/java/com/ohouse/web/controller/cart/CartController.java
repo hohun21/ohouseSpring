@@ -5,7 +5,6 @@ import com.ohouse.web.domain.cart.CartItemDTO;
 import com.ohouse.web.domain.cart.CartOptionEditRequestDTO;
 import com.ohouse.web.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -41,39 +40,42 @@ public class CartController {
     }
 
     @PostMapping("/cartAdd.htm")
-    @ResponseStatus(HttpStatus.OK)
-    public void cartAdd(@RequestBody List<CartItemDTO> cartItemDTOList,
-                        @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id)
+    @ResponseBody
+    public ResponseEntity<String> cartAdd(@RequestBody List<CartItemDTO> cartItemDTOList,
+                        @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id)
             throws SQLException, NamingException {
 
         int cart_id = this.cartService.findCartID(member_id);
         cartService.insert(cartItemDTOList, cart_id);
+        return ResponseEntity.ok("success");
     }
 
     @PostMapping("/cartQuantityEdit.htm")
-    @ResponseStatus(HttpStatus.OK)
-    public void cartQuantityEdit(@RequestBody CartItemDTO cartItemDTO,
-                                 @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id)
+    @ResponseBody
+    public ResponseEntity<String> cartQuantityEdit(@RequestBody CartItemDTO cartItemDTO,
+                                 @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id)
             throws SQLException, NamingException {
 
         int cart_id = cartService.findCartID(member_id);
 
         cartService.updateCartQuantity(cartItemDTO, cart_id);
+        return ResponseEntity.ok("success");
     }
 
     @PostMapping("/cartOptionEdit.htm")
-    @ResponseStatus(HttpStatus.OK)
-    public void cartOptionEdit(
+    @ResponseBody
+    public ResponseEntity<String> cartOptionEdit(
             @RequestBody CartOptionEditRequestDTO requestDTO,
-            @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id
+            @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id
     ) throws Exception {
 
         cartService.updateCartOption(member_id,requestDTO);
+        return ResponseEntity.ok("success");
     }
 
     @PostMapping("/cartDelete.htm")
     public ResponseEntity<String> cartDelete(@RequestBody List<Integer> cartItemsIds,
-                                             @AuthenticationPrincipal(expression = "member_vo.memberId") int member_id)
+                                             @AuthenticationPrincipal(expression = "member_vo.memberId") Integer member_id)
             throws Exception {
 
         int cart_id = this.cartService.findCartID(member_id);

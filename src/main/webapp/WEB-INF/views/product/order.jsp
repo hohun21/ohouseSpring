@@ -133,7 +133,7 @@
             <!-- ========================= -->
             <!-- 배송지  -->
             <!-- ========================= -->
-            <%--<section class="section">
+            <section class="section">
                 <h2 class="section-title">배송지</h2>
 
                 <c:choose>
@@ -195,7 +195,7 @@
                     </c:otherwise>
                 </c:choose>
 
-            </section>--%>
+            </section>
             <input type="hidden" id="selectedAddressId" value="1">
 
             <select id="orderRequestMsg">
