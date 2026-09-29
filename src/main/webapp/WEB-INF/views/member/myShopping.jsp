@@ -540,8 +540,8 @@
         }
 
         .order-details {
-            display: block;
-        / / 화살표
+            display: none;
+
         }
 
         .order-details.open {
@@ -576,6 +576,21 @@
         .order-buttons button:hover {
             background: #f7f7f7;
         }
+        .order-totalCount {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .order-details {
+            display: none;
+        }
+
+        .order-details.open {
+            display: block;
+        }
+
+        .order-item {
+            cursor: pointer;
+        }
     </style>
 
 </head>
@@ -589,7 +604,7 @@
 <div class="top-nav">
     <a href="${pageContext.request.contextPath}/member/myPage.htm">프로필</a>
     <a href="${pageContext.request.contextPath}/member/myShopping.htm" class="active">나의 쇼핑</a>
-    <a href="#">나의 리뷰</a>
+    <a href="${pageContext.request.contextPath}/member/myReview.htm">나의 리뷰</a>
     <!-- 💡 수정 1: 상단 설정 버튼 경로 연결 -->
     <a href="${pageContext.request.contextPath}/changePwd.htm">설정</a>
 </div>
@@ -606,7 +621,7 @@
         <div class="benefit-icon coupon-icon">C</div>
         <div class="benefit-info">
             <a href="/member/couponlist.htm" class="benefit-title">쿠폰</a>
-            <strong id="coupon-count"></strong>
+            <strong id="coupon-count">${couponCount}</strong>
         </div>
     </div>
 
@@ -674,11 +689,12 @@
                         <div>
                             <span><fmt:formatDate value="${order.order_date}" pattern="yyyy-MM-dd"/></span>
                             <span class="order-name">${order.order_name}</span>
+                            <span class="order-totalCount"><fmt:formatNumber value="${order.total_price}" pattern="#,###"/>원 </span>
                         </div>
-                        <button type="button" class="order-toggle">
+                        <%--<button type="button" class="order-toggle">
                             <span>주문상세</span>
                             <span class="arrow">▼</span>
-                        </button>
+                        </button>--%>
                     </div>
 
                     <div class="order-details">
@@ -750,14 +766,18 @@
     </div>
 </div>
 <script>
-    document.querySelectorAll(".order-toggle").forEach(function (button) {
-        button.addEventListener("click", function () {
-            const orderItem = button.closest(".order-item");
+    document.querySelectorAll(".order-header").forEach(function (header) {
+        header.addEventListener("click", function () {
+
+            const orderItem = header.closest(".order-item");
             const details = orderItem.querySelector(".order-details");
-            const arrow = button.querySelector(".arrow");
+            const arrow = header.querySelector(".arrow");
 
             const isOpen = details.classList.toggle("open");
-            arrow.textContent = isOpen ? "▲" : "▼";
+
+            if (arrow) {
+                arrow.textContent = isOpen ? "▲" : "▼";
+            }
         });
     });
     document.querySelectorAll(".confirm-btn").forEach(function (button) {
@@ -772,7 +792,7 @@
 
             try {
                 const response = await fetch(
-                    "${pageContext.request.contextPath}/order/confirm.htm?orders_detail_id=" + orderDetailId,
+                    "${pageContext.request.contextPath}/order/payment/confirm.htm?orders_detail_id=" + orderDetailId,
                     {
                         method: "POST"
                     }
@@ -800,7 +820,7 @@
 
             try {
                 const response = await fetch(
-                    "${pageContext.request.contextPath}/order/return.htm?orders_detail_id=" + orderDetailId,
+                    "${pageContext.request.contextPath}/order/payment/return.htm?orders_detail_id=" + orderDetailId,
                     {
                         method: "POST"
                     }
@@ -828,7 +848,7 @@
 
             try {
                 const response = await fetch(
-                    "${pageContext.request.contextPath}/order/cancel.htm?orders_detail_id=" + orderDetailId,
+                    "${pageContext.request.contextPath}/order/payment/cancel.htm?orders_detail_id=" + orderDetailId,
                     {
                         method: "POST"
                     }

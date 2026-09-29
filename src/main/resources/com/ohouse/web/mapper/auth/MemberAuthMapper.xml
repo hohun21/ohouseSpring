@@ -66,5 +66,11 @@
 	<update id="upgradeLegacyPassword">
 		UPDATE member SET password = #{password} WHERE id = #{id} AND password = #{oldPassword}
 	</update>
+	
+	<update id="withdraw">
+		UPDATE member
+		SET status = 0
+		WHERE id = #{id} AND status = 1
+	</update>
 
 </mapper>

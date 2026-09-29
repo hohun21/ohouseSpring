@@ -724,7 +724,8 @@
              data-image-url="${item.image_url}"
              data-sku="${item.sku}"
              data-price="${item.price}"
-             data-quantity="${item.quantity}">
+             data-quantity="${item.quantity}"
+        >
 
             <div class="cart-option-content">
 
@@ -738,7 +739,9 @@
                             <span> / </span>
                         </c:if>
 
-                        <span>
+                        <span class="cart-option"
+                        data-group="${option.option_group_name}"
+                        data-value="${option.option_value_name}">
                         ${option.option_group_name}:
                         ${option.option_value_name}
                     </span>

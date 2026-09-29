@@ -34,16 +34,28 @@ implements AuthenticationFailureHandler {
 
 		String loginPage = request.getContextPath() + "/auth/login.htm";
 
+		// 잠금 상태는 새 실패 횟수로 기록하지 않음
 		if (exception instanceof LoginLockedException) {
 			response.sendRedirect(loginPage + "?error=locked");
 			return;
 		}
 
+		// 비밀번호가 확인된 계정만 상태를 구분해 안내
 		if (exception instanceof MemberStatusAuthenticationException) {
-			response.sendRedirect(loginPage + "?error=status");
+			int status =
+					((MemberStatusAuthenticationException) exception).getStatus();
+
+			if (status == 0) {
+				response.sendRedirect(loginPage + "?error=withdrawn");
+			} else if (status == -1) {
+				response.sendRedirect(loginPage + "?error=suspended");
+			} else {
+				response.sendRedirect(loginPage + "?error=status");
+			}
 			return;
 		}
 
+		// 잘못된 아이디·비밀번호 실패 횟수 표시
 		String id = request.getParameter("username");
 		int failureCount = 0;
 

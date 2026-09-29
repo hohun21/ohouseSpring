@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.ohouse.web.mapper.address.AddressMapper">
+
+    <select id="getAddressCount" resultType="int">
+        SELECT COUNT(*) 
+        FROM shipping_address 
+        WHERE member_id = #{memberId}
+    </select>
+
+    <update id="resetDefaultAddress">
+        UPDATE shipping_address 
+        SET is_default = 'N' 
+        WHERE member_id = #{memberId}
+    </update>
+
+    <insert id="insertAddress" parameterType="com.ohouse.web.domain.address.ShippingAddressDTO">
+        INSERT INTO shipping_address (
+            address_id, member_id, address_name, recipient_name, phone, 
+            zip_code, base_address, detail_address, is_default, request_msg
+        ) VALUES (
+            seq_shipping_address.NEXTVAL, #{member_id}, #{address_name}, #{recipient_name}, #{phone}, 
+            #{zip_code}, #{base_address}, #{detail_address}, #{is_default}, #{request_msg}
+        )
+    </insert>
+
+    <select id="getAddressList" resultType="com.ohouse.web.domain.address.ShippingAddressDTO">
+        SELECT * 
+        FROM shipping_address 
+        WHERE member_id = #{memberId} 
+        ORDER BY is_default DESC, address_id DESC
+    </select>
+
+    <update id="updateDefaultAddress">
+        UPDATE shipping_address 
+        SET is_default = 'Y' 
+        WHERE address_id = #{addressId} 
+          AND member_id = #{memberId}
+    </update>
+
+    <!-- 배송지 삭제 -->
+    <delete id="deleteAddress">
+        DELETE FROM shipping_address 
+        WHERE address_id = #{addressId} 
+          AND member_id = #{memberId}
+    </delete>
+
+</mapper>

@@ -14,4 +14,5 @@ public interface MemberAuthMapper {
     int insertCart(@Param("memberId") Integer memberId);
     int updatePassword(@Param("id") String id, @Param("password") String password);
     int upgradeLegacyPassword(@Param("id") String id, @Param("oldPassword") String oldPassword, @Param("password") String password);
+    int withdraw(@Param("id") String id);
 }

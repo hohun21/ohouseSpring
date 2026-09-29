@@ -345,6 +345,7 @@ $("#buyBtn").on("click", async function () {
         }
 
         $(this).find(".cart-item").each(function () {
+
             selectedItems.push({
                 cart_items_id: Number(this.dataset.cartItemsId),
                 brand_id: Number(this.dataset.brandId),
@@ -355,7 +356,12 @@ $("#buyBtn").on("click", async function () {
                 sku: this.dataset.sku,
                 price: Number(this.dataset.price),
                 quantity: Number($(this).find(".quantity-input").val()),
-                options: JSON.parse(this.dataset.options || "[]")
+                options: $(this).find(".cart-option").map(function () {
+                    return {
+                        option_group_name: this.dataset.group,
+                        option_value_name: this.dataset.value
+                    };
+                }).get()
             });
         });
     });

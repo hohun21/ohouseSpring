@@ -171,7 +171,7 @@ public class SellerService {
         return productId;
     }
 
-    // 3. 상품 수정 로직 (ORA-02292 무결성 에러 예외 처리 반영)
+    // 3. 상품 수정 로직 (옵션 증발 버그 수정 완료)
     @Transactional(rollbackFor = Exception.class)
     public boolean updateProduct(ProductFormDTO form) {
         Integer brandId = sellerMapper.getBrandId(form.getBrandName());
@@ -179,6 +179,7 @@ public class SellerService {
             throw new RuntimeException("등록된 브랜드 정보를 찾을 수 없습니다: " + form.getBrandName());
         }
         
+        // 상품 기본 정보 업데이트
         ProductDTO productDTO = ProductDTO.builder()
                 .productId(form.getProductId())
                 .categoryId(form.getCategoryId())
@@ -205,15 +206,26 @@ public class SellerService {
             }
         }
 
-        try {
-            // 플랜 A: 옵션 전체 삭제 후 재생성 시도
-            sellerMapper.deleteProductOptionsByProductId(form.getProductId());
-            sellerMapper.deleteOptionGroupsByProductId(form.getProductId());
+        // 💡 1. 폼에서 새로운 옵션(옵션명)이 입력되어 넘어왔는지 검사합니다.
+        boolean hasNewOptions = false;
+        if (form.getOptionNames() != null && form.getOptionNames().length > 0) {
+            for (String opt : form.getOptionNames()) {
+                if (opt != null && !opt.trim().isEmpty()) {
+                    hasNewOptions = true;
+                    break;
+                }
+            }
+        }
 
-            Map<String, Integer> optionValueIdMap = new HashMap<>();
-            int optionGroupCount = 0;
+        // 💡 2. 분기 처리: 새 옵션 구조가 왔을 때만 삭제 후 재생성 (플랜 A)
+        if (hasNewOptions) {
+            try {
+                sellerMapper.deleteProductOptionsByProductId(form.getProductId());
+                sellerMapper.deleteOptionGroupsByProductId(form.getProductId());
 
-            if (form.getOptionNames() != null && form.getOptionValues() != null) {
+                Map<String, Integer> optionValueIdMap = new HashMap<>();
+                int optionGroupCount = 0;
+
                 for (int i = 0; i < form.getOptionNames().length; i++) {
                     if (form.getOptionNames()[i].trim().equals("")) continue;
                     optionGroupCount++;
@@ -230,79 +242,85 @@ public class SellerService {
                         optionValueIdMap.put(optName, valueDTO.getOptionValueId());
                     }
                 }
-            }
 
-            if (form.getExtraNames() != null && form.getExtraNames().length > 0) {
-                OptionGroupDTO extraGroupDTO = OptionGroupDTO.builder().productId(form.getProductId()).groupName("추가상품").sortOrder(optionGroupCount + 1).required(0).build();
-                sellerMapper.insertOptionGroup(extraGroupDTO);
-                int extraGroupId = extraGroupDTO.getOptionGroupId();
+                if (form.getExtraNames() != null && form.getExtraNames().length > 0) {
+                    OptionGroupDTO extraGroupDTO = OptionGroupDTO.builder().productId(form.getProductId()).groupName("추가상품").sortOrder(optionGroupCount + 1).required(0).build();
+                    sellerMapper.insertOptionGroup(extraGroupDTO);
+                    int extraGroupId = extraGroupDTO.getOptionGroupId();
 
-                for (int i = 0; i < form.getExtraNames().length; i++) {
-                    if (form.getExtraNames()[i].trim().equals("")) continue;
-                    String extraName = form.getExtraNames()[i].trim();
-                    OptionValueDTO extraValDTO = OptionValueDTO.builder().optionGroupId(extraGroupId).optionName(extraName).sortOrder(i + 1).build();
-                    sellerMapper.insertOptionValue(extraValDTO);
-                    int extraValueId = extraValDTO.getOptionValueId();
-                    
-                    ProductOptionDTO extraSkuDTO = ProductOptionDTO.builder().productId(form.getProductId()).sku("[추가상품] " + extraName).price(Integer.parseInt(form.getExtraPrices()[i])).stock(Integer.parseInt(form.getExtraStocks()[i])).status(Integer.parseInt(form.getExtraStocks()[i]) == 0 ? "SOLD_OUT" : "ACTIVE").build();
-                    sellerMapper.insertProductOption(extraSkuDTO);
-                    sellerMapper.insertProductOptionValue(ProductOptionValueDTO.builder().productOptionId(extraSkuDTO.getProductOptionId()).optionValueId(extraValueId).build());
-                }
-            }
-
-            if (form.getSkuNames() != null) {
-                for (int i = 0; i < form.getSkuNames().length; i++) {
-                    String currentSku = form.getSkuNames()[i];
-                    ProductOptionDTO skuDTO = ProductOptionDTO.builder().productId(form.getProductId()).sku(currentSku).price(Integer.parseInt(form.getSkuPrices()[i])).stock(Integer.parseInt(form.getSkuStocks()[i])).status(Integer.parseInt(form.getSkuStocks()[i]) == 0 ? "SOLD_OUT" : "ACTIVE").build();
-                    sellerMapper.insertProductOption(skuDTO);
-                    int productOptionId = skuDTO.getProductOptionId();
-
-                    for (String optName : optionValueIdMap.keySet()) {
-                        if (currentSku.contains(optName)) {
-                            sellerMapper.insertProductOptionValue(ProductOptionValueDTO.builder().productOptionId(productOptionId).optionValueId(optionValueIdMap.get(optName)).build());
-                        }
+                    for (int i = 0; i < form.getExtraNames().length; i++) {
+                        if (form.getExtraNames()[i].trim().equals("")) continue;
+                        String extraName = form.getExtraNames()[i].trim();
+                        OptionValueDTO extraValDTO = OptionValueDTO.builder().optionGroupId(extraGroupId).optionName(extraName).sortOrder(i + 1).build();
+                        sellerMapper.insertOptionValue(extraValDTO);
+                        int extraValueId = extraValDTO.getOptionValueId();
+                        
+                        ProductOptionDTO extraSkuDTO = ProductOptionDTO.builder().productId(form.getProductId()).sku("[추가상품] " + extraName).price(Integer.parseInt(form.getExtraPrices()[i])).stock(Integer.parseInt(form.getExtraStocks()[i])).status(Integer.parseInt(form.getExtraStocks()[i]) == 0 ? "SOLD_OUT" : "ACTIVE").build();
+                        sellerMapper.insertProductOption(extraSkuDTO);
+                        sellerMapper.insertProductOptionValue(ProductOptionValueDTO.builder().productOptionId(extraSkuDTO.getProductOptionId()).optionValueId(extraValueId).build());
                     }
                 }
-            }
-
-        } catch (Exception e) {
-            // ORA-02292 (주문 내역이 있어 외래키 제약조건에 걸릴 때)
-            if (e.getMessage() != null && e.getMessage().contains("2292")) {
-                System.out.println("주문 내역 발견! 옵션 삭제 취소 후 가격/재고 UPDATE 모드로 진입합니다.");
-                
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                
-                sellerMapper.resetAllOptionStocksToZero(form.getProductId());
 
                 if (form.getSkuNames() != null) {
                     for (int i = 0; i < form.getSkuNames().length; i++) {
-                        sellerMapper.updateOptionPriceAndStock(
-                            form.getProductId(), 
-                            form.getSkuNames()[i], 
-                            Integer.parseInt(form.getSkuPrices()[i]), 
-                            Integer.parseInt(form.getSkuStocks()[i])
-                        );
+                        String currentSku = form.getSkuNames()[i];
+                        ProductOptionDTO skuDTO = ProductOptionDTO.builder().productId(form.getProductId()).sku(currentSku).price(Integer.parseInt(form.getSkuPrices()[i])).stock(Integer.parseInt(form.getSkuStocks()[i])).status(Integer.parseInt(form.getSkuStocks()[i]) == 0 ? "SOLD_OUT" : "ACTIVE").build();
+                        sellerMapper.insertProductOption(skuDTO);
+                        int productOptionId = skuDTO.getProductOptionId();
+
+                        for (String optName : optionValueIdMap.keySet()) {
+                            if (currentSku.contains(optName)) {
+                                sellerMapper.insertProductOptionValue(ProductOptionValueDTO.builder().productOptionId(productOptionId).optionValueId(optionValueIdMap.get(optName)).build());
+                            }
+                        }
                     }
                 }
-                if (form.getExtraNames() != null) {
-                    for (int i = 0; i < form.getExtraNames().length; i++) {
-                        if (form.getExtraNames()[i].trim().equals("")) continue;
-                        String extraName = "[추가상품] " + form.getExtraNames()[i].trim();
-                        sellerMapper.updateOptionPriceAndStock(
-                            form.getProductId(), 
-                            extraName, 
-                            Integer.parseInt(form.getExtraPrices()[i]), 
-                            Integer.parseInt(form.getExtraStocks()[i])
-                        );
-                    }
+
+            } catch (Exception e) {
+                // 외래키 제약조건 등에 걸렸을 때는 롤백 후 가격/재고만 업데이트
+                if (e.getMessage() != null && e.getMessage().contains("2292")) {
+                    System.out.println("주문 내역 발견! 옵션 삭제 취소 후 가격/재고 UPDATE 모드로 진입합니다.");
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                    updatePricesAndStocksOnly(form); // 💡 분리한 메서드 호출
+                    return true; 
+                } else {
+                    throw new RuntimeException(e);
                 }
-                return true; 
-            } else {
-                throw new RuntimeException(e);
             }
+        } else {
+            // 💡 3. 수량/가격만 넘어온 경우 기존 데이터를 삭제하지 않고 안전하게 업데이트만 진행!
+            updatePricesAndStocksOnly(form);
         }
 
         return true;
+    }
+
+    // 💡 4. 재고/가격만 업데이트하는 로직을 깔끔하게 메서드로 분리했습니다.
+    private void updatePricesAndStocksOnly(ProductFormDTO form) {
+        sellerMapper.resetAllOptionStocksToZero(form.getProductId());
+
+        if (form.getSkuNames() != null) {
+            for (int i = 0; i < form.getSkuNames().length; i++) {
+                sellerMapper.updateOptionPriceAndStock(
+                    form.getProductId(), 
+                    form.getSkuNames()[i], 
+                    Integer.parseInt(form.getSkuPrices()[i]), 
+                    Integer.parseInt(form.getSkuStocks()[i])
+                );
+            }
+        }
+        if (form.getExtraNames() != null) {
+            for (int i = 0; i < form.getExtraNames().length; i++) {
+                if (form.getExtraNames()[i].trim().equals("")) continue;
+                String extraName = "[추가상품] " + form.getExtraNames()[i].trim();
+                sellerMapper.updateOptionPriceAndStock(
+                    form.getProductId(), 
+                    extraName, 
+                    Integer.parseInt(form.getExtraPrices()[i]), 
+                    Integer.parseInt(form.getExtraStocks()[i])
+                );
+            }
+        }
     }
 
     // 4. 상품 정보 삭제 로직
@@ -312,7 +330,7 @@ public class SellerService {
         return result > 0;
     }
     
-    // 5. 상품 수정 폼을 위한 옵션 포맷팅 (💡 null 방어 코드 추가)
+    // 5. 상품 수정 폼을 위한 옵션 포맷팅
     public List<Map<String, String>> getOptionItemsForEdit(int productId) {
         List<Map<String, String>> optionItems = new ArrayList<>();
         List<OptionGroupDTO> groups = sellerMapper.getOptionGroups(productId);
@@ -323,7 +341,6 @@ public class SellerService {
         
         for (OptionGroupDTO group : groups) {
             if (group == null || "추가상품".equals(group.getGroupName())) continue;
-            
             if (group.getOptionGroupId() == null) continue;
             
             List<OptionValueDTO> values = sellerMapper.getOptionValues(group.getOptionGroupId());

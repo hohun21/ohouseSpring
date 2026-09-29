@@ -112,9 +112,17 @@ function findProductOption() {
                 if (!response.ok) {
                     throw new Error("HTTP " + response.status);
                 }
-                return response.json();
+                return response.text();
             })
             .then(function (data) {
+
+                data = JSON.parse(data);
+                console.log("data =", data);
+                console.log("type =", typeof data);
+                console.log("isArray =", Array.isArray(data));
+                console.log("status =", data.status);
+                console.log("keys =", Object.keys(data));
+
                 if (!data) {
                     showToast("선택한 옵션 조합이 없습니다.");
                     initOptions();
@@ -214,9 +222,11 @@ const selectOptionData = [];
 function createSelectedOption(data, names, option_value_ids) {
     const selectedOptionValueIds = option_value_ids.map(Number);
     const maxStock = Number(data.stock);
+
     console.log("★★★★★ productOption 응답");
     console.log(data);
     console.log("brand_name =", data.brand_name);
+
 
     const options =
         selects
@@ -257,6 +267,7 @@ function createSelectedOption(data, names, option_value_ids) {
 
     console.log("★★★★★ 저장된 주문 데이터");
     console.log(selectOptionData);
+
     const selectedList = document.getElementById("selectedList");
     if (!selectedList) return;
 
@@ -406,7 +417,6 @@ function changeImage(element) {
     element.classList.add("active");
 }
 
-
 $(".cart").on("click", async function () {
     if (selectOptionData.length === 0) {
         showToast("옵션 선택 후에 버튼을 클릭해주세요.");
@@ -444,6 +454,7 @@ $(".buy").on("click", async function () {
     }
 
     try {
+
         const response = await fetch("/order/productOrder.htm", {
             method: "POST",
             headers: {
@@ -519,7 +530,7 @@ function closeEditReviewModal() {
 // 리뷰 삭제 요청 함수
 function deleteReview(reviewId, productId) {
     if (confirm("정말 삭제하시겠습니까?")) {
-		location.href = "/deleteReview.htm?reviewId=" + reviewId;
+		location.href = "/review/deleteReview.htm?reviewId=" + reviewId;
        }
 }
 
@@ -548,7 +559,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const imageUrl = decodeURIComponent(urlParams.get("imageUrl") || "");
         const productId = urlParams.get("product_id");
 
-        // 위에 정의하신 openEditReviewModal 함수 호출
         if (typeof openEditReviewModal === "function") {
             openEditReviewModal(reviewId, rating, content, imageUrl);
         }

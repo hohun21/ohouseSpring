@@ -1,5 +1,4 @@
 package com.ohouse.web.controller.main;
-
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -52,3 +51,4 @@ public class MainController {
         return "main/main"; 
     }
 }
+
