@@ -57,9 +57,12 @@
 							<div style="font-size: 12px; color: #9e9e9e; margin-bottom: 6px;">
 								<span style="color: #35c5f0; font-size: 14px;"> <c:forEach
 										begin="1" end="${review.rating}">★</c:forEach>
-								</span> <span style="margin-left: 6px;">${review.regDate}</span> <span
-									style="margin-left: 4px; color: #35c5f0; font-weight: bold;">|
-									오늘의집 구매</span>
+								</span> <span style="margin-left: 6px;">${review.regDate}</span>
+								<c:if test="${review.isPurchased eq 1}">
+												<span
+													style="margin-left: 4px; color: #35c5f0; font-weight: bold;">|
+													오늘의집 구매</span>
+											</c:if>
 							</div>
 
 							<!-- 옵션 정보 (있는 경우에만) -->

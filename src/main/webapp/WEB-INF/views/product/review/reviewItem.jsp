@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <div class="review-container-wrapper">
 	<div class="review-list">
 		<c:choose>
@@ -26,7 +27,7 @@
 								<!-- 💥 본인인 경우에만 수정/삭제 버튼 노출 -->
 								<div class="review-owner-actions" style="font-size: 12px;">
 									<c:if
-										test="${not empty authUser and authUser.memberId eq review.memberId}">
+										test="${not empty sessionScope.authUser and sessionScope.authUser.memberId eq review.memberId}">
 
 										<a href="javascript:void(0);" class="js-edit-review-btn"
 											data-review-id="${review.reviewId}"
@@ -35,7 +36,7 @@
 											data-image-url="${review.reviewImage.imageUrl}"> 댓글 수정 </a>
 
 									</c:if>
-									<c:if test="${isAdmin}">
+									<c:if test="${not empty sessionScope.authUser and sessionScope.authUser.role == 'ADMIN'}">
 										<a href="javascript:void(0);"
 											onclick="deleteReview(${review.reviewId})"
 											style="color: #f44336; text-decoration: none;">댓글 삭제</a>
@@ -112,7 +113,8 @@
 								</c:choose>
 
 								<!-- 관리자 전용 토글 버튼 -->
-								<c:if test="${isAdmin}">
+								<%--임시로 주석 <c:if test="${isAdmin}"> --%>
+								<c:if test="${not empty sessionScope.authUser and sessionScope.authUser.role == 'ADMIN'}">
 									<div class="admin-control-wrap" style="margin-top: 5px;">
 										<button type="button" class="btn-admin-hide"
 											onclick="toggleHideImage(${review.reviewId}, ${review.isHideImage})">
@@ -160,7 +162,8 @@
 											오늘의 집 고객센터</span>
 
 										<%-- 💥 [수정] 문자열 "true"도 인식하도록 조건 통일 --%>
-										<c:if test="${isAdmin eq true or isAdmin eq 'true'}">
+										<%-- 임시!!! <c:if test="${isAdmin eq true or isAdmin eq 'true'}"> --%>
+										<c:if test="${not empty sessionScope.authUser and sessionScope.authUser.role == 'ADMIN'}">
 											<div style="font-size: 11px;">
 												<a href="javascript:void(0);"
 													onclick="toggleReplyForm(${review.reviewId})"
@@ -177,7 +180,8 @@
 
 							<%-- 2. 답변이 없고 관리자인 경우: [답변 달기] 버튼 노출 --%>
 							<%-- 💥 [수정] isAdmin 조건 통일 --%>
-							<c:if test="${isAdmin and empty review.adminReply}">
+							<%-- <c:if test="${isAdmin and empty review.adminReply}"> --%>
+							<c:if test="${not empty sessionScope.authUser and sessionScope.authUser.role == 'ADMIN' and empty review.adminReply}">
 								<button type="button"
 									onclick="toggleReplyForm(${review.reviewId})"
 									style="padding: 4px 8px; font-size: 11px; color: #35c5f0; border: 1px solid #35c5f0; background: #fff; border-radius: 4px; cursor: pointer;">
@@ -185,7 +189,8 @@
 							</c:if>
 
 							<%-- 3. 관리자 전용 답변 작성/수정 폼 (기본 숨김) --%>
-							<c:if test="${isAdmin eq true or isAdmin eq 'true'}">
+							<%-- 임시 주석처리!!<c:if test="${isAdmin eq true or isAdmin eq 'true'}"> --%>
+							<c:if test="${not empty sessionScope.authUser and sessionScope.authUser.role == 'ADMIN'}">
 								<div id="reply-form-${review.reviewId}"
 									style="display: none; margin-top: 8px; background: #f9f9f9; padding: 10px; border-radius: 4px;">
 									<textarea id="reply-input-${review.reviewId}" rows="3"

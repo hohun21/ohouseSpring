@@ -624,14 +624,39 @@
             </section>
 
             <!-- 2. 리뷰 -->
-            <section id="detail-review" class="tab-content">
-               <%-- <jsp:include page="/WEB-INF/views/product/review/reviewList.jsp">
+           	<section id="detail-review" class="tab-content">
+                <jsp:include page="/WEB-INF/views/product/review/reviewList.jsp">
                     <jsp:param name="product_id" value="${pdto.productDTO.product_id}"/>
                     <jsp:param name="member_id" value="${memberId != null ? memberId : 2}"/>
-                </jsp:include>--%>
-            </section>
+                </jsp:include>
+            </section> 
+            <script type="text/javascript">
+         // 기존 탭 클릭 이벤트(혹은 상품 상세 페이지 스크립트 내부에 추가)
+            $('.tabs a').on('click', function(e) {
+                e.preventDefault();
+                const target = $(this).attr('href'); // 예: #detail-review
+                
+                $('.tabs a').removeClass('active');
+                $(this).addClass('active');
+                
+                $('.tab-content').removeClass('active');
+                $(target).addClass('active');
 
-            <!-- 3. 문의 -->
+                // 만약 누른 탭이 리뷰 탭(#detail-review)이고, 아직 리뷰 목록이 로드되지 않았거나 비어있다면 최초 로드 수행
+                if (target === '#detail-review') {
+                    var reviewListContainer = document.getElementById('reviewListContainer');
+                    // 내용이 비어있거나 초기 상태라면 첫 페이지 데이터 호출
+                    if (reviewListContainer && (!reviewListContainer.innerHTML.trim() || reviewListContainer.querySelectorAll('.review-item').length === 0)) {
+                        // reviewList.js 내부의 펑션이나 아래와 같이 직접 호출 가능
+                        if (typeof triggerReviewFetch === 'function') {
+                            triggerReviewFetch('1', 'best');
+                        }
+                    }
+                }
+            });
+            </script>
+           
+			<!-- 3. 문의 -->
             <section id="qna" class="tab-content">
                 <h2>문의</h2>
             </section>
@@ -646,7 +671,8 @@
     </div>
 </div>
 <script src="${pageContext.request.contextPath}/resources/js/productDetail.js"></script>
-<<jsp:include page="/WEB-INF/views/product/review/reviewFormModal.jsp">
+<jsp:include page="/WEB-INF/views/product/review/reviewFormModal.jsp">
+
     <jsp:param name="productId" value="${pdto.productDTO.product_id}"/>
 </jsp:include>
 <jsp:include page="/WEB-INF/views/product/review/reviewEditModal.jsp">

@@ -18,7 +18,7 @@
 
 		<!-- 모달 Form Body -->
 		<form id="reviewWriteForm"
-			action="${pageContext.request.contextPath}/writeReview.htm"
+			action="${pageContext.request.contextPath}/review/writeReview.htm"
 			method="post" enctype="multipart/form-data" style="padding: 24px;">
 
 			<!-- 상품 정보 요약 Box -->
