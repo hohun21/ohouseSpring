@@ -1,8 +1,10 @@
 package com.ohouse.web.controller.order;
 
+import com.ohouse.web.domain.address.ShippingAddressDTO;
 import com.ohouse.web.domain.member.CouponDTO;
 import com.ohouse.web.domain.order.OrderItemDTO;
 import com.ohouse.web.domain.order.OrderRequestDTO;
+import com.ohouse.web.service.address.AddressService;
 import com.ohouse.web.service.member.MemberService;
 import com.ohouse.web.service.order.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final MemberService memberService;
+    private final AddressService addressService;
 
     @PostMapping("/productOrder.htm")
     public ResponseEntity<String> productOrder(
@@ -51,9 +54,10 @@ public class OrderController {
         List<OrderItemDTO> orderdto =
                 (List<OrderItemDTO>) session.getAttribute("orderdto");
         List<CouponDTO> clist = this.memberService.selectCoupon(member_id);
+        List<ShippingAddressDTO> addressList = this.addressService.getAddressList(member_id);
         model.addAttribute("orderdto", orderdto);
         model.addAttribute("clist", clist);
-
+        model.addAttribute("addressList", addressList);
         return "product/order";
     }
 
