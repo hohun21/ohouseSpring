@@ -53,7 +53,6 @@
         SELECT brand_id FROM brand WHERE brand_name = #{brandName}
     </select>
 
-    <!-- 상품 등록 (useGeneratedKeys로 PK인 productId 자동 주입) -->
     <insert id="insertProduct" parameterType="com.ohouse.web.domain.seller.ProductDTO" useGeneratedKeys="true" keyProperty="productId" keyColumn="product_id">
         INSERT INTO product (product_id, category_id, brand_id, product_name, price, description, original_price, discount_rate, created, updated, status) 
         VALUES (product_seq.NEXTVAL, #{categoryId}, #{brandId}, #{productName}, #{price}, #{description}, #{originalPrice}, #{discountRate}, SYSDATE, SYSDATE, 'ACTIVE')
@@ -136,7 +135,6 @@
         VALUES (product_option_value_seq.NEXTVAL, #{productOptionId}, #{optionValueId})
     </insert>
 
-    <!-- 💡 1. ProductOptionDTO를 위한 명시적 resultMap 추가 -->
     <resultMap id="productOptionResultMap" type="com.ohouse.web.domain.seller.ProductOptionDTO">
         <id property="productOptionId" column="product_option_id"/>
         <result property="productId" column="product_id"/>
@@ -146,11 +144,10 @@
         <result property="status" column="status"/>
     </resultMap>
 
-    <!-- 💡 2. resultType 대신 resultMap 적용 -->
     <select id="getProductOptions" resultMap="productOptionResultMap">
         SELECT product_option_id AS productOptionId, product_id AS productId, sku, price, stock, status 
         FROM product_option 
-        WHERE product_id = #{productId} 
+        WHERE product_id = #{productId} AND status != 'DELETED'
         ORDER BY product_option_id ASC
     </select>
 
@@ -166,12 +163,12 @@
     <select id="getTotalProductCount" resultType="int">
         SELECT COUNT(*) FROM product WHERE brand_id = #{brandId}
     </select>
-
+    
     <select id="getSoldOutProductCount" resultType="int">
         SELECT COUNT(*) FROM (
             SELECT p.product_id FROM product p 
             JOIN product_option po ON p.product_id = po.product_id 
-            WHERE p.brand_id = #{brandId} 
+            WHERE p.brand_id = #{brandId} AND po.status != 'DELETED'
             GROUP BY p.product_id 
             HAVING SUM(po.stock) = 0
         )
@@ -184,7 +181,7 @@
                p.status, p.created, p.updated, 
                NVL(SUM(po.stock), 0) AS totalStock 
         FROM product p 
-        LEFT JOIN product_option po ON p.product_id = po.product_id 
+        LEFT JOIN product_option po ON p.product_id = po.product_id AND po.status != 'DELETED'
         WHERE p.brand_id = #{brandId} 
         GROUP BY p.product_id, p.category_id, p.brand_id, p.product_name, p.price, 
                  p.description, p.original_price, p.discount_rate, p.status, p.created, p.updated 
@@ -212,7 +209,7 @@
     </select>
 
     <update id="resetAllOptionStocksToZero">
-        UPDATE product_option SET stock = 0, status = 'SOLD_OUT' WHERE product_id = #{productId}
+        UPDATE product_option SET stock = 0, status = 'DELETED' WHERE product_id = #{productId}
     </update>
 
     <update id="updateOptionPriceAndStock">
