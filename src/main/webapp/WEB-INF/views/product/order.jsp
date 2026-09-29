@@ -133,7 +133,7 @@
             <!-- ========================= -->
             <!-- 배송지  -->
             <!-- ========================= -->
-            <%--<section class="section">
+            <section class="section">
                 <h2 class="section-title">배송지</h2>
 
                 <c:choose>
@@ -188,14 +188,14 @@
                         <div class="address-box" style="text-align: center; padding: 40px 0;">
                             <p style="color: #757575; font-size: 15px; margin-bottom: 15px;">등록된 배송지가 없습니다.</p>
                             <button type="button" class="change-btn" style="padding: 10px 20px; font-size: 14px;"
-                                    onclick="location.href='${pageContext.request.contextPath}/addressList.htm'">
+                                    onclick="location.href='${pageContext.request.contextPath}/member/addressList.htm'">
                                 배송지 추가하기
                             </button>
                         </div>
                     </c:otherwise>
                 </c:choose>
 
-            </section>--%>
+            </section>
             <input type="hidden" id="selectedAddressId" value="1">
 
             <select id="orderRequestMsg">

@@ -3,27 +3,17 @@ package com.ohouse.web.controller.product;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ohouse.member.dto.AuthUserDTO;
-import com.ohouse.web.domain.auth.AuthUser;
-import com.ohouse.web.domain.member.MemberVO;
 import com.ohouse.web.domain.product.ProductDetailDTO;
 import com.ohouse.web.domain.product.ProductOptionDTO;
-import com.ohouse.web.domain.product.review.OptionFilterDTO;
-import com.ohouse.web.domain.product.review.PageDTO;
-import com.ohouse.web.domain.product.review.ReviewDTO;
-import com.ohouse.web.domain.product.review.ReviewPageDTO;
-import com.ohouse.web.domain.product.review.ReviewSummaryDTO;
+import com.ohouse.web.domain.product.review.*;
 import com.ohouse.web.domain.security.CustomerUser;
 import com.ohouse.web.service.product.ProductService;
 import com.ohouse.web.service.product.ReviewService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -110,6 +100,7 @@ public class ProductController {
 			@RequestParam("option_value_ids") List<Long> option_value_ids
 			) throws SQLException, JsonProcessingException {
 
+
 		ProductOptionDTO result =
 				productService.productOption(product_id, option_value_ids);
 
@@ -127,17 +118,11 @@ public class ProductController {
 		System.out.println(json);
 		System.out.println("========================================");
 
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.parseMediaType("text/plain;charset=UTF-8"))
+                .body(json);
+    }
 
-
-
-
-
-
-
-		return ResponseEntity
-				.ok()
-				.contentType(MediaType.parseMediaType("application/json;charset=UTF-8"))
-				.body(json);
-	}
 
 }
