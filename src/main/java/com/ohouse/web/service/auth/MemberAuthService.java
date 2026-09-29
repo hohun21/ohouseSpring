@@ -33,4 +33,11 @@ public class MemberAuthService {
         if (memberId == null || memberAuthMapper.insertCart(memberId) != 1)
             throw new IllegalStateException("장바구니 생성에 실패했습니다.");
     }
+    
+    @Transactional
+    public void withdraw(String id) {
+    	if (memberAuthMapper.withdraw(id) != 1) {
+			throw new IllegalStateException("회원탈퇴에 실패 했습니다.");
+		}
+    }
 }

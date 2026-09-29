@@ -9,12 +9,14 @@ import com.ohouse.web.domain.product.review.ReviewDTO;
 import com.ohouse.web.domain.product.review.ReviewPageDTO;
 import com.ohouse.web.domain.security.CustomerUser;
 import com.ohouse.web.service.address.AddressService;
+import com.ohouse.web.service.auth.MemberAuthService;
 import com.ohouse.web.service.member.MemberService;
 import com.ohouse.web.service.order.OrderService;
 import com.ohouse.web.service.product.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,8 @@ public class MyPageController {
     
     private final MemberService memberService;
 
+    private final MemberAuthService memberAuthService;
+    
     private final ReviewService reviewService;
 
     private final AddressService addressService; // 💡 배송지 서비스 추가
@@ -184,5 +188,26 @@ public class MyPageController {
         return "member/couponlist";
     }
 
+    @GetMapping("/withdraw.htm")
+    public String withdraw() {
+        return "member/withdraw";
+    }
+
+    @PostMapping("/withdrawPro.htm")
+    public String withdrawPro(Authentication authentication, HttpServletRequest request) {
+
+        String id = authentication.getName();
+
+        // db status=0 탈퇴상태변경
+        memberAuthService.withdraw(id);
+        
+        // 로그인 세션 종료 
+        request.getSession().invalidate();
+        
+        // Spring Security 인증 정보 제거
+        SecurityContextHolder.clearContext();
+
+        return "redirect:/main.htm";
+    }
 
 }
