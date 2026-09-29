@@ -15,6 +15,7 @@ public class ShoppingController {
 
     @GetMapping("/best.htm")
     public String best(Model model) {
+
         model.addAttribute("bestProducts", service.best());
         model.addAttribute("activeMenu", "best");
         return "shopping/best/best";
